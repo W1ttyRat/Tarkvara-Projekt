@@ -1,0 +1,52 @@
+[
+  {
+    "plate": "WV54LUT",
+    "ocr_confidence": 0.99,
+    "det_confidence": 0.84
+  },
+  {
+    "plate": "EA61EVG",
+    "ocr_confidence": 0.98,
+    "det_confidence": 0.83
+  },
+  {
+    "plate": "EY64CZE",
+    "ocr_confidence": 1.0,
+    "det_confidence": 0.83
+  },
+  {
+    "plate": "EY64CZ",
+    "ocr_confidence": 0.99,
+    "det_confidence": 0.86
+  },
+  {
+    "plate": "BF12RNJ",
+    "ocr_confidence": 0.98,
+    "det_confidence": 0.84
+  },
+  {
+    "plate": "VU15SSX",
+    "ocr_confidence": 0.99,
+    "det_confidence": 0.82
+  },
+  {
+    "plate": "YU15SSX",
+    "ocr_confidence": 0.98,
+    "det_confidence": 0.89
+  },
+  {
+    "plate": "LR09FSL",
+    "ocr_confidence": 0.99,
+    "det_confidence": 0.87
+  },
+  {
+    "plate": "HF10DNO",
+    "ocr_confidence": 0.98,
+    "det_confidence": 0.86
+  },
+  {
+    "plate": "AW15AVR",
+    "ocr_confidence": 1.0,
+    "det_confidence": 0.83
+  }
+]

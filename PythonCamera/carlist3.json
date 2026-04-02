@@ -1,0 +1,32 @@
+[
+  {
+    "plate": "LJY969K",
+    "ocr_confidence": 1.0,
+    "det_confidence": 0.86
+  },
+  {
+    "plate": "LJ9833F",
+    "ocr_confidence": 0.99,
+    "det_confidence": 0.83
+  },
+  {
+    "plate": "LJS833F",
+    "ocr_confidence": 0.99,
+    "det_confidence": 0.83
+  },
+  {
+    "plate": "LJY9",
+    "ocr_confidence": 0.99,
+    "det_confidence": 0.83
+  },
+  {
+    "plate": "LJY969",
+    "ocr_confidence": 1.0,
+    "det_confidence": 0.82
+  },
+  {
+    "plate": "LJY9697",
+    "ocr_confidence": 0.98,
+    "det_confidence": 0.83
+  }
+]
