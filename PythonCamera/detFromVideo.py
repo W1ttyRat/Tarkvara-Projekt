@@ -106,10 +106,10 @@ if __name__ == "__main__":
     #process_video(0)
 
     # For video file, provide the path
-    #process_video("carvideo.mp4")
+    process_video("carvideo2.mp4")
 
     # For 2nd monitor screen capture
-    process_monitor(2, duration_seconds=25)
+    #process_monitor(2, duration_seconds=25)
 
     for plate_info in CarList:
         print(f"Detected Plate: {plate_info[0]}, OCR Confidence: {plate_info[1]}, Detection Confidence: {plate_info[2]}")

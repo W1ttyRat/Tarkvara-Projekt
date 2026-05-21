@@ -152,6 +152,9 @@ Vajadusel saad neid väärtusi koodis muuta.
 - Tulemusi ei salvestata õigesse kohta: veendu, et käivitad skripti kaustast `PythonCamera`.
 - Monitori salvestus ei tööta: proovi muuta monitori indeksit, näiteks `process_monitor(1, duration_seconds=25)`.
 
+-Kui video faili ei leia siis vaata kas oled PythonCamera kaustas, mitte tema parent kaustas.
+
+
 ## Litsents
 
 Projektis on fail `LICENSE`.
