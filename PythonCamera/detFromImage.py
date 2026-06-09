@@ -19,7 +19,7 @@ def load_image(image_path):
 
 def draw_predictions(frame):
     annotated_frame = MODEL.draw_predictions(frame)
-    return annotated_frame
+    return annotated_frame.image
 
 def get_predictions(frame):
     predictions = MODEL.predict(frame)
@@ -50,7 +50,11 @@ if __name__ == "__main__":
         det_confidence = r.detection.confidence
         box = r.detection.bounding_box
 
-        if ocr_confidence > 0.6 and det_confidence > 0.6:
-            print(f"High confidence for plate: {plate_text}, OCR Confidence: {ocr_confidence:.2f}, Detection Confidence: {det_confidence:.2f}, Box: {box}")
-        else:
-            print(f"Low confidence for plate: {plate_text}, OCR Confidence: {ocr_confidence:.2f}, Detection Confidence: {det_confidence:.2f}, Box: {box}")
+        print(ocr_confidence)
+        print(det_confidence)
+
+
+#        if ocr_confidence > 0.6 and det_confidence > 0.6:
+#            print(f"High confidence for plate: {plate_text}, OCR Confidence: {ocr_confidence:.2f}, Detection Confidence: {det_confidence:.2f}, Box: {box}")
+#        else:
+#            print(f"Low confidence for plate: {plate_text}, OCR Confidence: {ocr_confidence:.2f}, Detection Confidence: {det_confidence:.2f}, Box: {box}")

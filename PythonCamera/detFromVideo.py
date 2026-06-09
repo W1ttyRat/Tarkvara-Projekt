@@ -1,6 +1,10 @@
+from pathlib import Path
+
 import cv2, mss, time, json
 from fast_alpr import ALPR
 import numpy as np
+
+BASE_DIR = Path(__file__).resolve().parent
 
 # Initialize the ALPR system with the specified models
 MODEL = ALPR(
@@ -10,7 +14,7 @@ MODEL = ALPR(
 
 # load the image
 def load_image(image_path):
-    frame = cv2.imread(image_path)
+    frame = cv2.imread(str(image_path))
     return frame
 
 # draw the predictions on the image
@@ -25,8 +29,9 @@ def get_predictions(frame):
 
 # save the annotated image
 def save_annotated_image(annotated_frame):
-    output_path = "AnnotatedImages/annotated_image.jpg"
-    cv2.imwrite(output_path, annotated_frame)
+    output_path = BASE_DIR / "AnnotatedImages" / "annotated_image.jpg"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    cv2.imwrite(str(output_path), annotated_frame)
 
 # process video frames from a video file or webcam
 def process_video(source):
@@ -91,6 +96,7 @@ def process_monitor(monitor_index=2, duration_seconds=30):
 
 
 def save_carlist_json(car_list, output_path="carlist.json"):
+    output_path = BASE_DIR / output_path
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump([{"plate": p, "ocr_confidence": o, "det_confidence": d} for p, o, d in car_list], f, indent=2)
 
@@ -106,7 +112,7 @@ if __name__ == "__main__":
     #process_video(0)
 
     # For video file, provide the path
-    process_video("carvideo2.mp4")
+    process_video(BASE_DIR / "carVideo2.mp4")
 
     # For 2nd monitor screen capture
     #process_monitor(2, duration_seconds=25)
