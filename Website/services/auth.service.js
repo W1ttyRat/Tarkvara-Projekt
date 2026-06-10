@@ -8,7 +8,15 @@ class AuthService {
             throw err;
         }
 
-        return true; // Placeholder for actual authentication logic
+        if (username === 'boss') {
+            return { role: 'boss' };
+        } else if (username === 'employee') {
+            return { role: 'employee' };
+        } else {
+            const err = new Error('Invalid username or password');
+            err.statusCode = 401;
+            throw err;
+        }
     }
 }
 

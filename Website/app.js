@@ -55,6 +55,9 @@ app.use('/auth', authRoutes);
 const employeeRoutes = require('./routes/employee.routes');
 app.use('/employee', employeeRoutes);
 
+const bossRoutes = require('./routes/boss.routes');
+app.use('/boss', bossRoutes);
+
 // error handling middleware
 //app.use(errorHandler);
 

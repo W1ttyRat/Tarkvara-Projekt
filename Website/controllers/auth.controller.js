@@ -14,9 +14,16 @@ const getLoginPage = async (req, res, next) => {
 const login = async (req, res, next) => {
     try {
         const test = await authService.loginUser(req.body);
-        console.log(test);
 
-        res.redirect('/employee');
+        if (test.role === 'boss') {
+            return res.redirect('/boss');
+        } else if (test.role === 'employee') {
+            return res.redirect('/employee');
+        } else {
+            const err = new Error('Unknown role');
+            err.statusCode = 500;
+            throw err;
+        }
     } catch (err) {
         if (err.statusCode && err.statusCode >= 400 && err.statusCode < 500) {
             return res.status(err.statusCode).render('auth/login', {
