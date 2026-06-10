@@ -12,6 +12,7 @@ const bodyParser = require('body-parser');
 // load env vars
 dotenv.config();
 
+
 // create express app
 const app = express();
 app.use(bodyParser.json());
@@ -49,13 +50,17 @@ const indexRoutes = require('./routes/index.routes');
 app.use('/', indexRoutes);
 
 const bookingRoutes = require("./routes/bookingRoutes");
-
 app.use(express.urlencoded({ extended: true }));
 app.use("/", bookingRoutes);
 
-const adminRoutes = require("./routes/adminRoutes");
-app.use("/", adminRoutes);
+const authRoutes = require('./routes/auth.routes');
+app.use('/auth', authRoutes);
 
+const employeeRoutes = require('./routes/employee.routes');
+app.use('/employee', employeeRoutes);
+
+const bossRoutes = require('./routes/boss.routes');
+app.use('/boss', bossRoutes);
 
 // error handling middleware
 //app.use(errorHandler);
