@@ -12,6 +12,7 @@ const bodyParser = require('body-parser');
 // load env vars
 dotenv.config();
 
+
 // create express app
 const app = express();
 app.use(bodyParser.json());
@@ -48,6 +49,14 @@ app.set('layout', 'layouts/main'); // default layout
 const indexRoutes = require('./routes/index.routes');
 app.use('/', indexRoutes);
 
+const authRoutes = require('./routes/auth.routes');
+app.use('/auth', authRoutes);
+
+const employeeRoutes = require('./routes/employee.routes');
+app.use('/employee', employeeRoutes);
+
+const bossRoutes = require('./routes/boss.routes');
+app.use('/boss', bossRoutes);
 
 // error handling middleware
 //app.use(errorHandler);
