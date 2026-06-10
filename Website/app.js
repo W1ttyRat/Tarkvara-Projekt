@@ -49,6 +49,11 @@ app.set('layout', 'layouts/main'); // default layout
 const indexRoutes = require('./routes/index.routes');
 app.use('/', indexRoutes);
 
+const authRoutes = require('./routes/auth.routes');
+app.use('/auth', authRoutes);
+
+const employeeRoutes = require('./routes/employee.routes');
+app.use('/employee', employeeRoutes);
 
 // error handling middleware
 //app.use(errorHandler);
