@@ -1,0 +1,34 @@
+<h1>Töötaja töölaud</h1>
+
+<section>
+  <h2>Tänased broneeringud</h2>
+
+  <% bookings.forEach(booking => { %>
+    <div class="card mb-3 p-3">
+      <strong><%= booking.time %></strong>
+      <p><%= booking.client %> — <%= booking.vehicle %></p>
+      <p><%= booking.service %></p>
+      <span><%= booking.status %></span>
+    </div>
+  <% }) %>
+</section>
+
+<section>
+  <h2>Minu graafik</h2>
+
+  <% shifts.forEach(shift => { %>
+    <div class="card mb-3 p-3">
+      <p><%= shift.date %></p>
+      <p><%= shift.location %></p>
+      <p><%= shift.start %> - <%= shift.end %></p>
+    </div>
+  <% }) %>
+</section>
+
+<section>
+  <h2>Minu kategooriad</h2>
+
+  <% categories.forEach(category => { %>
+    <span class="badge bg-primary"><%= category %></span>
+  <% }) %>
+</section>

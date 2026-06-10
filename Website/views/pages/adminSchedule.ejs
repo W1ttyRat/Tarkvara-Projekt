@@ -1,0 +1,52 @@
+<h1>Töötaja kalendrivaade</h1>
+
+<div class="schedule-layout">
+  <section class="calendar-section">
+    <div class="calendar-header">
+      <button id="prevMonth" type="button">&lt;</button>
+      <h2 id="monthTitle"></h2>
+      <button id="nextMonth" type="button">&gt;</button>
+    </div>
+
+    <div class="calendar-legend">
+      <span><b class="legend-available"></b> Saadaval</span>
+      <span><b class="legend-selected"></b> Valitud</span>
+      <span><b class="legend-unavailable"></b> Pole saadaval</span>
+    </div>
+
+    <div class="calendar-weekdays">
+      <div>E</div><div>T</div><div>K</div><div>N</div><div>R</div><div>L</div><div>P</div>
+    </div>
+
+    <div id="calendarGrid" class="calendar-grid"></div>
+  </section>
+
+  <aside class="schedule-sidebar">
+    <label>Asukoht</label>
+    <select id="locationSelect">
+      <option value="">Vali asukoht</option>
+      <% locations.forEach(location => { %>
+        <option value="<%= location.id %>"><%= location.name %></option>
+      <% }) %>
+    </select>
+
+    <h3>Algus</h3>
+    <div id="startTimes" class="time-buttons"></div>
+
+    <h3>Lõpp</h3>
+    <div id="endTimes" class="time-buttons"></div>
+
+    <div class="selected-box">
+      <strong>Valitud kuupäevad:</strong>
+      <ul id="selectedDates"></ul>
+    </div>
+
+    <div class="action-buttons">
+      <button id="clearBtn" type="button">Kustuta</button>
+      <button id="confirmBtn" type="button" disabled>Kinnita</button>
+    </div>
+  </aside>
+</div>
+
+<link rel="stylesheet" href="/css/pages/adminSchedule.css">
+<script src="/js/adminSchedule.js" defer></script>

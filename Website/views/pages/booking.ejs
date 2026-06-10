@@ -1,0 +1,20 @@
+<h1>Broneeri ülevaatus</h1>
+
+<form method="POST" action="/booking" class="booking-form">
+  <input name="registration_number" placeholder="Auto reg nr" required>
+
+  <select name="service_id" required>
+    <option value="">Vali teenus</option>
+    <option value="1">B-kategooria ülevaatus</option>
+    <option value="2">A-kategooria ülevaatus</option>
+    <option value="3">CE-kategooria ülevaatus</option>
+  </select>
+
+  <input type="date" name="date" required>
+
+  <input name="client_name" placeholder="Nimi" required>
+  <input name="phone" placeholder="Telefon" required>
+  <input type="email" name="email" placeholder="Email">
+
+  <button type="submit">Broneeri</button>
+</form>

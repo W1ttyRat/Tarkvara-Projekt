@@ -48,6 +48,14 @@ app.set('layout', 'layouts/main'); // default layout
 const indexRoutes = require('./routes/index.routes');
 app.use('/', indexRoutes);
 
+const bookingRoutes = require("./routes/bookingRoutes");
+
+app.use(express.urlencoded({ extended: true }));
+app.use("/", bookingRoutes);
+
+const adminRoutes = require("./routes/adminRoutes");
+app.use("/", adminRoutes);
+
 
 // error handling middleware
 //app.use(errorHandler);
