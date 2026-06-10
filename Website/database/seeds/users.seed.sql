@@ -2,7 +2,9 @@
 -- Note: These are hashed passwords using bcryptjs with "password123" as the plaintext
 -- To generate your own: const bcrypt = require('bcryptjs'); bcrypt.hash('password123', 10)
 
-INSERT INTO users (first_name, last_name, email, password_hash, role, created_at) VALUES
+-- ära kasuta neid andmeid, see on näidis
+
+INSERT INTO users (first_name, last_name, username, password_hash, role, created_at) VALUES
 ('John', 'Admin', 'john.admin@test.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86E36ZyWsIS', 'admin', NOW()),
 ('Jane', 'Admin', 'jane.admin@test.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86E36ZyWsIS', 'admin', NOW()),
 ('Alice', 'User', 'alice.user@test.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86E36ZyWsIS', 'user', NOW()),
