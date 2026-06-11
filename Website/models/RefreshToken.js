@@ -63,3 +63,5 @@ class RefreshTokenModel {
         return rows[0] || null;
     }
 }
+
+module.exports = new RefreshTokenModel();

@@ -51,24 +51,24 @@ const refreshToken = async (req, res, next) => {
     }
 };
 
-const register = async (req, res, next) => {
+
+
+const logout = async (req, res, next) => {
     try {
-        await authService.registerUser(req.body);
-        res.redirect('/auth/login');
+        await authService.logoutSession(req.cookies?.refresh_token);
     } catch (err) {
-        if (err.statusCode && err.statusCode >= 400 && err.statusCode < 500) {
-            return res.status(err.statusCode).render('auth/register', {
-                title: 'Register',
-                pageClass: 'register-page',
-                errorMessage: err.message,
-            });
-        }
-        next(err);
+        console.log('Error during logout:', err);
+        // ignore token errors during logout, continue with clearing cookies and redirecting
+    } finally {
+        res.clearCookie('access_token', ACCESS_COOKIE_OPTIONS);
+        res.clearCookie('refresh_token', REFRESH_COOKIE_OPTIONS);
+        res.redirect('/auth/login');
     }
-}
+};
 
 module.exports = {
     getLoginPage,
     login,
-    register
+    logout,
+    refreshToken,
 };
