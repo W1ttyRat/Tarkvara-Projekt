@@ -11,13 +11,13 @@ class UserModel {
     }
 
     async getUserByUsername(username) {
-        const query = `SELECT id, first_name, last_name, username, password_hash, role FROM users WHERE username = $1 LIMIT 1`;
+        const query = `SELECT id, first_name, last_name, username, password_hash, role, session_version FROM users WHERE username = $1 LIMIT 1`;
         const { rows } = await pool.query(query, [username]);
         return rows[0] || null;
     }
 
     async getUserById(id) {
-        const query = 'SELECT id, first_name, last_name, username, password_hash, role FROM users WHERE id = $1 LIMIT 1';
+        const query = 'SELECT id, first_name, last_name, username, password_hash, role, session_version FROM users WHERE id = $1 LIMIT 1';
         const { rows } = await pool.query(query, [id]);
         return rows[0] || null;
     }

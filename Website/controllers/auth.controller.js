@@ -1,4 +1,5 @@
 const authService = require('../services/auth.service');
+const { ACCESS_COOKIE_OPTIONS, REFRESH_COOKIE_OPTIONS } = require('../utils/constants');
 
 const getLoginPage = async (req, res, next) => {
     try {
@@ -13,12 +14,11 @@ const getLoginPage = async (req, res, next) => {
 
 const login = async (req, res, next) => {
     try {
-        const user = await authService.loginUser(req.body);
-        req.session.user = {
-            id: user.id,
-            username: user.username,
-            role: user.role,
-        }; // store user info in session
+        const { accessToken, refreshToken } = await authService.loginUser(req.body);
+
+        res.cookie('access_token', accessToken, ACCESS_COOKIE_OPTIONS);
+        res.cookie('refresh_token', refreshToken, REFRESH_COOKIE_OPTIONS);
+
         res.redirect('/boss');
     } catch (err) {
         if (err.statusCode && err.statusCode >= 400 && err.statusCode < 500) {
@@ -27,6 +27,25 @@ const login = async (req, res, next) => {
                 pageClass: 'login-page',
                 errorMessage: err.message,
             });
+        }
+        next(err);
+    }
+};
+
+const refreshToken = async (req, res, next) => {
+    try {
+        const { accessToken, refreshToken: newFreshToken } =
+            await authService.refreshSession(req.cookies?.refresh_token);
+
+        res.cookie('access_token', accessToken, ACCESS_COOKIE_OPTIONS);
+        res.cookie('refresh_token', newFreshToken, REFRESH_COOKIE_OPTIONS);
+
+        return res.status(200).json({ message: 'Token refreshed' });
+    } catch (err) {
+        res.clearCookie('access_token', ACCESS_COOKIE_OPTIONS);
+        res.clearCookie('refresh_token', REFRESH_COOKIE_OPTIONS);
+        if (err.statusCode) {
+            return res.status(err.statusCode).json({ message: err.message });
         }
         next(err);
     }
