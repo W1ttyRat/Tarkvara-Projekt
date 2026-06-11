@@ -8,10 +8,10 @@ const ejsLayouts = require('express-ejs-layouts');
 //const errorHandler = require('./middleware/error.validate');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
+const session = require('express-session');
 
 // load env vars
-dotenv.config();
-
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 // create express app
 const app = express();
@@ -22,6 +22,13 @@ app.use(cookieParser());
 // configure helmet
 app.use(helmet({
     contentSecurityPolicy: false,
+}));
+
+// configure session
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
 }));
 
 // configure CORS
@@ -43,6 +50,9 @@ app.set('views', path.join(__dirname, 'views'));
 
 app.use(ejsLayouts);
 app.set('layout', 'layouts/main'); // default layout
+
+//const { setCurrentUser } = require('./middleware/auth.middleware');
+//app.use(setCurrentUser); // set req.user if access token is valid
 
 // Routes
 // example route

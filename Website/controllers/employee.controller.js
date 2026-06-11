@@ -1,4 +1,5 @@
 // add employee service
+const { Client } = require('pg');
 
 const getEmployeePage = async (req, res, next) => {
     try {
@@ -12,5 +13,5 @@ const getEmployeePage = async (req, res, next) => {
 };
 
 module.exports = {
-    getEmployeePage
+    getEmployeePage,
 };

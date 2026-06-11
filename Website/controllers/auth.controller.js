@@ -13,17 +13,13 @@ const getLoginPage = async (req, res, next) => {
 
 const login = async (req, res, next) => {
     try {
-        const test = await authService.loginUser(req.body);
-
-        if (test.role === 'boss') {
-            return res.redirect('/boss');
-        } else if (test.role === 'employee') {
-            return res.redirect('/employee');
-        } else {
-            const err = new Error('Unknown role');
-            err.statusCode = 500;
-            throw err;
-        }
+        const user = await authService.loginUser(req.body);
+        req.session.user = {
+            id: user.id,
+            username: user.username,
+            role: user.role,
+        }; // store user info in session
+        res.redirect('/boss');
     } catch (err) {
         if (err.statusCode && err.statusCode >= 400 && err.statusCode < 500) {
             return res.status(err.statusCode).render('auth/login', {
@@ -36,7 +32,24 @@ const login = async (req, res, next) => {
     }
 };
 
+const register = async (req, res, next) => {
+    try {
+        await authService.registerUser(req.body);
+        res.redirect('/auth/login');
+    } catch (err) {
+        if (err.statusCode && err.statusCode >= 400 && err.statusCode < 500) {
+            return res.status(err.statusCode).render('auth/register', {
+                title: 'Register',
+                pageClass: 'register-page',
+                errorMessage: err.message,
+            });
+        }
+        next(err);
+    }
+}
+
 module.exports = {
     getLoginPage,
-    login
+    login,
+    register
 };

@@ -1,16 +1,26 @@
-/* const pool = require("../config/db");
+const pool = require("../config/db");
 
 class UserModel {
-    async create({ first_name, last_name, email, passwordHash }) {
-        const query = ``;
-        const values = [first_name, last_name, email, passwordHash];
+    async createUser(first_name, last_name, username, passwordHash, role) {
+        const query = `INSERT INTO users (first_name, last_name, username, password_hash, role)
+                       VALUES ($1, $2, $3, $4, $5) RETURNING id`;
+        const values = [first_name, last_name, username, passwordHash, role];
 
-        try {
-            const { rows } = await pool.query(query, values);
-            return rows[0];
-        } catch (err) {
-            console.error(err);
-            throw new Error("Failed to create user", err);
-        }
+        const { rows } = await pool.query(query, values);
+        return rows[0] || null;
     }
-} */
+
+    async getUserByUsername(username) {
+        const query = `SELECT id, first_name, last_name, username, password_hash, role FROM users WHERE username = $1 LIMIT 1`;
+        const { rows } = await pool.query(query, [username]);
+        return rows[0] || null;
+    }
+
+    async getUserById(id) {
+        const query = 'SELECT id, first_name, last_name, username, password_hash, role FROM users WHERE id = $1 LIMIT 1';
+        const { rows } = await pool.query(query, [id]);
+        return rows[0] || null;
+    }
+}
+
+module.exports = new UserModel();
