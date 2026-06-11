@@ -22,13 +22,21 @@
   </section>
 
   <aside class="schedule-sidebar">
-    <label>Asukoht</label>
-    <select id="locationSelect">
-      <option value="">Vali asukoht</option>
-      <% locations.forEach(location => { %>
-        <option value="<%= location.id %>"><%= location.name %></option>
-      <% }) %>
+    <label>Linn</label>
+    <select id="citySelect">
+        <option value="">Vali linn</option>
+
+        <% [...new Set(locations.map(location => location.city))].forEach(city => { %>
+            <option value="<%= city %>">
+                <%= city %>
+            </option>
+        <% }) %>
     </select>
+
+<label>Ülevaatuspunkt</label>
+<select id="locationSelect" disabled>
+    <option value="">Vali esmalt linn</option>
+</select>
 
     <h3>Algus</h3>
     <div id="startTimes" class="time-buttons"></div>
@@ -40,6 +48,10 @@
       <strong>Valitud kuupäevad:</strong>
       <ul id="selectedDates"></ul>
     </div>
+    <div class="selected-box">
+      <strong>Päeva graafik:</strong>
+      <ul id="daySchedule"></ul>
+    </div>
 
     <div class="action-buttons">
       <button id="clearBtn" type="button">Kustuta</button>
@@ -49,4 +61,7 @@
 </div>
 
 <link rel="stylesheet" href="/css/pages/adminSchedule.css">
+<script>
+    window.locations = <%- JSON.stringify(locations) %>;
+</script>
 <script src="/js/adminSchedule.js" defer></script>
