@@ -11,6 +11,38 @@ let selectedEndTime = null;
 
 const unavailableDays = [1, 11, 12, 13, 17, 25, 26, 29];
 
+const citySelect = document.getElementById("citySelect");
+const locationSelect = document.getElementById("locationSelect");
+
+citySelect.addEventListener("change", () => {
+    const selectedCity = citySelect.value;
+
+    locationSelect.innerHTML = "";
+
+    if (!selectedCity) {
+        locationSelect.disabled = true;
+        locationSelect.innerHTML = `<option value="">Vali esmalt linn</option>`;
+        updateConfirmButton();
+        return;
+    }
+
+    const matchingLocations = window.locations.filter(location => {
+        return location.city === selectedCity;
+    });
+
+    locationSelect.disabled = false;
+    locationSelect.innerHTML = `<option value="">Vali ülevaatuspunkt</option>`;
+
+    matchingLocations.forEach(location => {
+        const option = document.createElement("option");
+        option.value = location.id;
+        option.textContent = location.address;
+        locationSelect.appendChild(option);
+    });
+
+    updateConfirmButton();
+});
+
 const monthNames = [
   "Jaanuar", "Veebruar", "Märts", "Aprill", "Mai", "Juuni",
   "Juuli", "August", "September", "Oktoober", "November", "Detsember"
@@ -71,20 +103,27 @@ function createDay(day, otherMonth) {
     return;
   }
 
-  if (isPastDate(day) || unavailableDays.includes(day)) {
-    dayEl.classList.add("unavailable");
-    dayEl.innerHTML += `<small>Pole saadaval</small>`;
-    calendarGrid.appendChild(dayEl);
-    return;
-  }
-
   const dateKey = getDateKey(day);
+
+  if (isPastDate(day) || unavailableDays.includes(day)) {
+
+        dayEl.classList.add("unavailable");
+        dayEl.innerHTML += `<small>Pole saadaval</small>`;
+
+        dayEl.addEventListener("click", () => {
+            loadDaySchedule(dateKey);
+        });
+
+        calendarGrid.appendChild(dayEl);
+        return;
+  }
 
   if (selectedDates.includes(dateKey)) {
     dayEl.classList.add("selected");
   }
 
   dayEl.addEventListener("click", () => {
+    loadDaySchedule(dateKey);
     if (selectedDates.includes(dateKey)) {
       selectedDates = selectedDates.filter(date => date !== dateKey);
     } else {
@@ -150,6 +189,30 @@ function updateConfirmButton() {
   );
 }
 
+async function loadDaySchedule(dateKey) {
+    const list = document.getElementById("daySchedule");
+    list.innerHTML = "<li>Laen...</li>";
+
+    const response = await fetch(`/employee/schedule/day?date=${dateKey}`);
+    const shifts = await response.json();
+
+    if (shifts.length === 0) {
+        list.innerHTML = "<li>Sel päeval pole kedagi tööl</li>";
+        return;
+    }
+
+    list.innerHTML = "";
+
+    shifts.forEach(shift => {
+        const start = shift.start_time.slice(11, 16);
+        const end = shift.end_time.slice(11, 16);
+
+        const li = document.createElement("li");
+        li.textContent = `${shift.start_time}-${shift.end_time} | ${shift.worker_name} | ${shift.location_city}, ${shift.location_address}`;
+        list.appendChild(li);
+    });
+}
+
 document.getElementById("prevMonth").addEventListener("click", () => {
   currentDate.setMonth(currentDate.getMonth() - 1);
   selectedDates = [];
@@ -177,17 +240,38 @@ document.getElementById("clearBtn").addEventListener("click", () => {
 
 document.getElementById("locationSelect").addEventListener("change", updateConfirmButton);
 
-confirmBtn.addEventListener("click", () => {
-  const data = {
-    location_id: document.getElementById("locationSelect").value,
-    dates: selectedDates,
-    start_time: selectedStartTime,
-    end_time: selectedEndTime
-  };
+confirmBtn.addEventListener("click", async () => {
+    const data = {
+        location_id: document.getElementById("locationSelect").value,
+        dates: selectedDates,
+        start_time: selectedStartTime,
+        end_time: selectedEndTime
+    };
 
-  console.log("Saadetav tööaeg:", data);
-  alert("Tööaeg valitud! Vaata console'i.");
+    try {
+        const response = await fetch("/employee/schedule", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            throw new Error("Server error");
+        }
+
+        const result = await response.json();
+        console.log(result);
+
+        alert("Tööaeg salvestatud");
+        window.location.reload();
+    } catch (error) {
+        console.error(error);
+        alert("Tööaja salvestamine ebaõnnestus");
+    }
 });
+
 
 renderCalendar();
 renderTimeButtons("startTimes", "start");
