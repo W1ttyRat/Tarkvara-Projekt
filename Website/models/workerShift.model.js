@@ -54,8 +54,50 @@ const getScheduleForDay = async (date) => {
     return result.rows;
 };
 
+const getWorkerShiftById = async (shiftId) => {
+    const result = await pool.query(
+        `
+        SELECT id, worker_id, location_id, start_time, end_time
+        FROM worker_shift
+        WHERE id = $1
+        `,
+        [shiftId]
+    );
+
+    return result.rows[0];
+};
+
+const deleteWorkerShift = async (shiftId) => {
+    await pool.query(
+        `
+        DELETE FROM worker_shift
+        WHERE id = $1
+        `,
+        [shiftId]
+    );
+};
+
+const hasWorkerShiftOnDate = async (workerId, date) => {
+    const result = await pool.query(
+        `
+        SELECT id
+        FROM worker_shift
+        WHERE worker_id = $1
+          AND start_time >= $2::date
+          AND start_time < ($2::date + INTERVAL '1 day')
+        LIMIT 1
+        `,
+        [workerId, date]
+    );
+
+    return result.rows.length > 0;
+};
+
 module.exports = {
     getWorkerShifts,
     createWorkerShift,
-    getScheduleForDay
+    getScheduleForDay,
+    getWorkerShiftById,
+    deleteWorkerShift,
+    hasWorkerShiftOnDate
 };
