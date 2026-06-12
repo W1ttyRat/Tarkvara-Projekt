@@ -1,0 +1,44 @@
+<h1>Broneeri ülevaatus</h1>
+
+<script>
+  window.locations = <%- JSON.stringify(locations || []) %>;
+</script>
+<script src="/js/booking.js" defer></script>
+
+<form method="POST" action="/booking" class="booking-form">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <input id="registration_number" name="registration_number" placeholder="Auto reg nr" required>
+
+  <select id="service_id" name="service_id" required>
+    <option value="">Vali teenus</option>
+    <% if (Array.isArray(service)) { %>
+      <% service.forEach(s => { %>
+        <option value="<%= s.id %>"><%= s.name %></option>
+      <% }) %>
+    <% } %>
+  </select>
+
+  <select id="location" name="location_city" required>
+    <option value="">Vali Linn</option>
+    <% [...new Set(location.map(location => location.city))].forEach(city => { %>
+            <option value="<%= city %>">
+                <%= city %>
+            </option>
+        <% }) %>
+  </select>
+
+
+
+  <select id="location_id" name="location_id" disabled required>
+    <option value="">Vali asukoht</option>
+  </select>
+
+  <input type="datetime-local" id="start_time" name="start_time" required>
+  <input type="datetime-local" id="end_time" name="end_time" required>
+
+  <input id="client_name" name="client_name" placeholder="Nimi" required>
+  <input id="phone" name="phone" placeholder="Telefon" required>
+  <input type="email" id="email" name="email" placeholder="Email">
+
+  <button type="submit">Broneeri</button>
+</form>

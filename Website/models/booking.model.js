@@ -33,6 +33,40 @@ class BookingModel {
         return result.rows[0];
     }
 
+        async createClient({ name, email, phone }) {
+        // Try to find exact duplicate first (match NULLs too)
+        const findQuery = `
+            SELECT * FROM client
+            WHERE name = $1
+              AND email IS NOT DISTINCT FROM $2
+              AND phone IS NOT DISTINCT FROM $3
+            LIMIT 1
+        `;
+        const findRes = await this.pool.query(findQuery, [name, email || null, phone || null]);
+        if (findRes.rows.length > 0) {
+            return findRes.rows[0];
+        }
+
+        const insertQuery = `
+            INSERT INTO client (name, email, phone)
+            VALUES ($1, $2, $3)
+            RETURNING *
+        `;
+        const values = [name, email || null, phone || null];
+        const result = await this.pool.query(insertQuery, values);
+        return result.rows[0];
+    }
+
+    async findVehicleByRegistration(registration_number) {
+        const query = `
+            SELECT id FROM vehicle
+            WHERE UPPER(TRIM(registration_number)) = UPPER(TRIM($1))
+            LIMIT 1
+        `;
+        const result = await this.pool.query(query, [registration_number]);
+        return result.rows[0] || null;
+    }
+
     async cancelReservation(reservationId) {
         const query = `
             UPDATE reservation
