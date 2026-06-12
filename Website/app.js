@@ -6,7 +6,6 @@ const path = require('path');
 const ejsLayouts = require('express-ejs-layouts');
 //const errorHandler = require('./middleware/error.validate');
 const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
 const csurf = require('csurf');
 const helmet = require('helmet');
 
@@ -16,17 +15,36 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 
 // create express app
 const app = express();
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(csurf({ cookie: { httpOnly: false, secure: process.env.NODE_ENV === 'production', sameSite: 'lax' } }));
+// configure CORS before csurf so preflight/headers are set
+app.use(cors({
+    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    credentials: true, // allow cookies
+}));
 
+// configure csurf with secure cookies in production
+app.use(csurf({ cookie: { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax' } }));
+
+// expose token to EJS views
 app.use((req, res, next) => {
-    res.locals.csrfToken = req.csrfToken();
+    try {
+        res.locals.csrfToken = req.csrfToken();
+    } catch (err) {
+        // if no csurf set for route, ignore
+        res.locals.csrfToken = null;
+    }
     next();
+});
+
+// endpoint for AJAX clients to fetch token if needed (e.g. React frontend)
+app.get('/api/csrf-token', (req, res) => {
+    res.json({ csrfToken: req.csrfToken() });
 });
 
 if (process.env.NODE_ENV === 'production') {
@@ -90,5 +108,16 @@ app.use('/boss', bossRoutes);
 //app.use(errorHandler);
 
 // export app for testing or start server (server.js)
+
+// error handler for CSRF to return JSON for API routes
+app.use((err, req, res, next) => {
+    if (err && err.code === 'EBADCSRFTOKEN') {
+        if (req.path.startsWith('/api/')) {
+            return res.status(403).json({ success: false, message: 'Invalid CSRF token' });
+        }
+        return res.status(403).send('Form tampered with');
+    }
+    next(err);
+});
 
 module.exports = app;
