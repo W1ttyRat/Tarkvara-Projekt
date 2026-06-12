@@ -1,8 +1,8 @@
 const bcrypt = require('bcrypt');
-const User = require('../models/User');
+const User = require('../models/User.model');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const RefreshToken = require('../models/RefreshToken');
+const RefreshToken = require('../models/RefreshToken.model');
 const { token } = require('morgan');
 
 const JWT_SECRET = process.env.JWT_SECRET;
