@@ -1,4 +1,4 @@
-const Booking = require('../models/Booking');
+const Booking = require('../models/booking.model');
 
 const getAllBookings = async (req, res) => {
     try {
@@ -9,13 +9,44 @@ const getAllBookings = async (req, res) => {
     }
 };
 
+// DB access delegated to models/Booking
+
 const createBooking = async (req, res) => {
     try {
-        const client_id = parseInt(req.body.client_id, 10);
-        const vehicle_id = parseInt(req.body.vehicle_id, 10);
+        let client_id = parseInt(req.body.client_id, 10);
+        // require registration_number to map to existing vehicle
+        const registration_number_raw = req.body.registration_number || '';
+        const registration_number = registration_number_raw.trim();
+        console.log('createBooking registration_number:', JSON.stringify(registration_number_raw), '->', JSON.stringify(registration_number));
+
+        let vehicle_id = parseInt(req.body.vehicle_id, 10);
+        if (isNaN(vehicle_id)) {
+            if (!registration_number) {
+                return res.status(400).json({ success: false, message: 'Sõiduki registreerimisnumber puudub.' });
+            }
+            const found = await Booking.findVehicleByRegistration(registration_number);
+            if (!found) {
+                return res.status(400).json({ success: false, message: 'Sõidukit ei leitud andmebaasist. Kasutage olemasolevat registreerimisnumbrit.' });
+            }
+            vehicle_id = found.id;
+        }
         const location_id = parseInt(req.body.location_id, 10);
         const service_id = parseInt(req.body.service_id, 10);
         const { start_time, end_time, comment } = req.body;
+
+        // If client_id not provided, create client from form fields via model
+        if (isNaN(client_id)) {
+            const client_name = req.body.client_name;
+            const phone = req.body.phone;
+            const email = req.body.email;
+
+            if (!client_name) {
+                return res.status(400).json({ success: false, message: 'Missing client_name' });
+            }
+
+            const client = await Booking.createClient({ name: client_name, email, phone });
+            client_id = client.id;
+        }
 
         if (isNaN(client_id) || isNaN(vehicle_id) || isNaN(service_id) || isNaN(location_id)) {
             return res.status(400).json({ 
@@ -83,8 +114,29 @@ const cancelReservation = async (req, res) => {
     }
 };
 
+const serviceModel = require('../models/service.model');
+const locationModel = require('../models/location.model');
+
+const getBookingPage = async (req, res, next) => {
+    try {
+        const service = await serviceModel.getAllServices();
+        const location = await locationModel.getAllLocations();
+
+        res.render('booking/booking', {
+            title: 'Broneering',
+            pageClass: 'booking-page',
+            service,
+            location,            // keep singular for existing template
+            locations: location, // also expose plural for client JS
+            csrfToken: req.csrfToken ? req.csrfToken() : null
+        });
+    } catch (err) {
+        return next(err);
+    }
+};
 module.exports = {
     getAllBookings,
     createBooking,
-    cancelReservation
+    cancelReservation,
+    getBookingPage
 };
