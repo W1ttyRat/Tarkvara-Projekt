@@ -11,8 +11,6 @@ router.get(
 );
 
 router.post("/schedule", employeeController.createSchedule);
-//test
-router.get("/test-db", employeeController.testDb);
 
 router.get("/schedule/day", employeeController.getScheduleForDay);
 
