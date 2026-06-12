@@ -81,7 +81,7 @@ CREATE TABLE worker_licence_category (
 
 CREATE TABLE location (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name VARCHAR(120) NOT NULL,
+    city VARCHAR(120) NOT NULL,
     address VARCHAR(255),
     door_width_mm INTEGER NOT NULL,
     door_height_mm INTEGER NOT NULL,
@@ -136,7 +136,6 @@ CREATE TABLE reservation (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     client_id INTEGER NOT NULL,
     vehicle_id INTEGER NOT NULL,
-    worker_id INTEGER NOT NULL,
     location_id INTEGER NOT NULL,
     service_id INTEGER NOT NULL,
     start_time TIMESTAMP NOT NULL,

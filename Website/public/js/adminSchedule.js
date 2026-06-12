@@ -275,7 +275,8 @@ confirmBtn.addEventListener("click", async () => {
         const response = await fetch("/employee/schedule", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "X-CSRF-Token": window.csrfToken
             },
             body: JSON.stringify(data)
         });
