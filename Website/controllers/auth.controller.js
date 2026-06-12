@@ -14,12 +14,14 @@ const getLoginPage = async (req, res, next) => {
 
 const login = async (req, res, next) => {
     try {
-        const { accessToken, refreshToken } = await authService.loginUser(req.body);
-
+        const { accessToken, refreshToken, user } = await authService.loginUser(req.body);
         res.cookie('access_token', accessToken, ACCESS_COOKIE_OPTIONS);
         res.cookie('refresh_token', refreshToken, REFRESH_COOKIE_OPTIONS);
 
-        res.redirect('/boss');
+        if (user.role === 'boss') {
+            return res.redirect('/boss');
+        }
+        res.redirect('/employee');
     } catch (err) {
         if (err.statusCode && err.statusCode >= 400 && err.statusCode < 500) {
             return res.status(err.statusCode).render('auth/login', {
