@@ -88,8 +88,9 @@ app.use(setCurrentUser); // set req.user if access token is valid
 
 // Routes
 // example route
-const indexRoutes = require('./routes/index.routes');
-app.use('/', indexRoutes);
+app.get('/', (req, res) => {
+    res.redirect('/auth/login');
+});
 
 const bookingRoutes = require('./routes/booking.routes');
 app.use(express.urlencoded({ extended: true }));

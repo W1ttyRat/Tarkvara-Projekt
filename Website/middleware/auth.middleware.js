@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const User = require('../models/User.model');
 
 const cookieOptions = {
     httpOnly: true,
@@ -60,8 +60,16 @@ const requireBoss = (req, res, next) => {
     next();
 };
 
+const requireEmployee = (req, res, next) => {
+    if (req.user?.role !== 'employee' && req.user?.role !== 'boss') {
+        return res.status(403).send('Forbidden');
+    }
+    next();
+};
+
 module.exports = {
     requireAuth,
     setCurrentUser,
-    requireBoss
+    requireBoss,
+    requireEmployee
 };

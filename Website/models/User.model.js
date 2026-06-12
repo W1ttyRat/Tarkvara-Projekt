@@ -37,6 +37,12 @@ class UserModel {
         const query = `UPDATE users SET failed_attempts = 0, locked_until = NULL WHERE id = $1`;
         await pool.query(query, [userId]);
     }
+
+    async incrementSessionVersion(userId) {
+        const query = 'UPDATE users SET session_version = session_version + 1 WHERE id = $1 RETURNING session_version';
+        const { rows } = await pool.query(query, [userId]);
+        return rows[0]?.session_version;
+    }
 }
 
 module.exports = new UserModel();
