@@ -9,7 +9,7 @@ const getAllBookings = async (req, res) => {
     }
 };
 
-exports.createBooking = async (req, res) => {
+const createBooking = async (req, res) => {
     try {
         const client_id = parseInt(req.body.client_id, 10);
         const vehicle_id = parseInt(req.body.vehicle_id, 10);
@@ -55,7 +55,7 @@ exports.createBooking = async (req, res) => {
     }
 };
 
-exports.cancelReservation = async (req, res) => {
+const cancelReservation = async (req, res) => {
     try {
         const reservationId = parseInt(req.params.id, 10); // ID tuleb URL-ist (nt /api/reservations/5/cancel)
 
@@ -83,4 +83,8 @@ exports.cancelReservation = async (req, res) => {
     }
 };
 
-exports.getAllBookings = getAllBookings;
+module.exports = {
+    getAllBookings,
+    createBooking,
+    cancelReservation
+};
