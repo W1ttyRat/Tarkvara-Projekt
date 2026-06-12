@@ -2,6 +2,8 @@ const calendarGrid = document.getElementById("calendarGrid");
 const monthTitle = document.getElementById("monthTitle");
 const selectedDatesList = document.getElementById("selectedDates");
 const confirmBtn = document.getElementById("confirmBtn");
+const workerShifts =
+    window.workerShifts || [];
 
 let currentDate = new Date();
 currentDate.setDate(1);
@@ -104,6 +106,9 @@ function createDay(day, otherMonth) {
   }
 
   const dateKey = getDateKey(day);
+  const shift = workerShifts.find(s => {
+    return s.start_time.startsWith(dateKey);
+  });
 
   if (isPastDate(day) || unavailableDays.includes(day)) {
 
@@ -116,6 +121,24 @@ function createDay(day, otherMonth) {
 
         calendarGrid.appendChild(dayEl);
         return;
+  }
+
+  if (shift) {
+
+    dayEl.style.backgroundColor = "#ffd54f";
+
+    const start =
+        shift.start_time.substring(11, 16);
+
+    const end =
+        shift.end_time.substring(11, 16);
+
+    dayEl.innerHTML += `
+        <small>
+            ${start}-${end}<br>
+            ${shift.address}
+        </small>
+    `;
   }
 
   if (selectedDates.includes(dateKey)) {

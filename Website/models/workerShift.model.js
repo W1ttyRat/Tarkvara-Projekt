@@ -1,5 +1,25 @@
 const pool = require("../config/db");
 
+const getWorkerShifts = async (workerId) => {
+    const result = await pool.query(
+        `
+        SELECT
+            ws.id,
+            ws.start_time,
+            ws.end_time,
+            l.city,
+            l.address
+        FROM worker_shift ws
+        JOIN location l
+            ON ws.location_id = l.id
+        WHERE ws.worker_id = $1
+        `,
+        [workerId]
+    );
+
+    return result.rows;
+};
+
 const createWorkerShift = async (workerId, locationId, startTime, endTime) => {
     await pool.query(
         `
@@ -35,6 +55,7 @@ const getScheduleForDay = async (date) => {
 };
 
 module.exports = {
+    getWorkerShifts,
     createWorkerShift,
     getScheduleForDay
 };

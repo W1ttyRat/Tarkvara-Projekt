@@ -14,12 +14,16 @@ const getEmployeePage = async (req, res, next) => {
 
 const getSchedulePage = async (req, res, next) => {
     try {
+        const workerId = 1;
+
         const locations = await locationModel.getAllLocations();
+        const shifts = await workerShiftModel.getWorkerShifts(workerId);
 
         res.render("employee/schedule", {
             title: "Töötaja kalendrivaade",
             pageClass: "employee-schedule-page",
-            locations
+            locations,
+            shifts
         });
     } catch (err) {
         next(err);
