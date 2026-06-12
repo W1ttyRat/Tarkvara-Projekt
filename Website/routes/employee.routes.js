@@ -16,6 +16,8 @@ router.get(
 
 router.post("/schedule", employeeController.createSchedule);
 
+router.delete("/schedule/:id", employeeController.deleteSchedule);
+
 router.get("/schedule/day", employeeController.getScheduleForDay);
 
 module.exports = router;
