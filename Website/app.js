@@ -4,10 +4,10 @@ const morgan = require('morgan');
 const cors = require('cors');
 const path = require('path');
 const ejsLayouts = require('express-ejs-layouts');
-//const errorHandler = require('./middleware/error.validate');
 const cookieParser = require('cookie-parser');
 const csurf = require('csurf');
 const helmet = require('helmet');
+const errorHandler = require('./middleware/error.middleware');
 
 
 // load env vars
@@ -104,8 +104,13 @@ app.use('/employee', employeeRoutes);
 const bossRoutes = require('./routes/boss.routes');
 app.use('/boss', bossRoutes);
 
-// error handling middleware
-//app.use(errorHandler);
+app.use((req, res, next) => {
+    const err = new Error(`Not found - ${req.originalUrl}`);
+    err.statusCode = 404;
+    next(err);
+});
+//error handling middleware
+app.use(errorHandler);
 
 // export app for testing or start server (server.js)
 
