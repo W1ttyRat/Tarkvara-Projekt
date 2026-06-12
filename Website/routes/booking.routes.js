@@ -7,6 +7,7 @@ router.get("/api/bookings", bookingController.getAllBookings);
 router.post("/api/bookings", bookingController.createBooking);
 router.patch("/api/bookings/:id/cancel", bookingController.cancelReservation);
 
+
 router.get("/booking", (req, res) => {
   res.render("pages/booking", {
     title: "Broneering",

@@ -1,6 +1,7 @@
 <h1>Broneeri ülevaatus</h1>
 
 <form method="POST" action="/booking" class="booking-form">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
   <input name="registration_number" placeholder="Auto reg nr" required>
 
   <select name="service_id" required>
