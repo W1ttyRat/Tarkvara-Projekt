@@ -11,7 +11,7 @@ let selectedDates = [];
 let selectedStartTime = null;
 let selectedEndTime = null;
 
-const unavailableDays = [1, 11, 12, 13, 17, 25, 26, 29];
+const unavailableDays = [];
 
 const citySelect = document.getElementById("citySelect");
 const locationSelect = document.getElementById("locationSelect");
