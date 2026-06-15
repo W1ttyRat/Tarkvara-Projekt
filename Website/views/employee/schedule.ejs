@@ -15,7 +15,13 @@
     </div>
 
     <div class="calendar-weekdays">
-      <div>E</div><div>T</div><div>K</div><div>N</div><div>R</div><div>L</div><div>P</div>
+      <div>E</div>
+      <div>T</div>
+      <div>K</div>
+      <div>N</div>
+      <div>R</div>
+      <div>L</div>
+      <div>P</div>
     </div>
 
     <div id="calendarGrid" class="calendar-grid"></div>
@@ -24,19 +30,19 @@
   <aside class="schedule-sidebar">
     <label>Linn</label>
     <select id="citySelect">
-        <option value="">Vali linn</option>
+      <option value="">Vali linn</option>
 
-        <% [...new Set(locations.map(location => location.city))].forEach(city => { %>
-            <option value="<%= city %>">
-                <%= city %>
-            </option>
+      <% [...new Set(locations.map(location=> location.city))].forEach(city => { %>
+        <option value="<%= city %>">
+          <%= city %>
+        </option>
         <% }) %>
     </select>
 
-<label>Ülevaatuspunkt</label>
-<select id="locationSelect" disabled>
-    <option value="">Vali esmalt linn</option>
-</select>
+    <label>Ülevaatuspunkt</label>
+    <select id="locationSelect" disabled>
+      <option value="">Vali esmalt linn</option>
+    </select>
 
     <h3>Algus</h3>
     <div id="startTimes" class="time-buttons"></div>
@@ -61,15 +67,15 @@
 </div>
 
 <link rel="stylesheet" href="/css/pages/adminSchedule.css">
-<script>
-    window.locations = <%- JSON.stringify(locations) %>;
+<script nonce="<%= cspNonce %>">
+  window.locations = <%- JSON.stringify(locations) %>;
 </script>
-<script>
+<script nonce="<%= cspNonce %>">
   window.workerShifts =
       <%- JSON.stringify(shifts) %>;
 </script>
-<script>
-    window.csrfToken = "<%= csrfToken %>";
+<script nonce="<%= cspNonce %>">
+  window.csrfToken = "<%= csrfToken %>";
 </script>
 <script src="/js/adminSchedule.js" defer></script>
-<script>window.csrfToken = "<%= csrfToken %>";</script>
+<script nonce="<%= cspNonce %>">window.csrfToken = "<%= csrfToken %>";</script>

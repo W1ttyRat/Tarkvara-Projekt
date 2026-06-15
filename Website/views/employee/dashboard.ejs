@@ -6,11 +6,12 @@
       <label for="cityFilter" class="form-label">City</label>
       <select id="cityFilter" name="city" class="form-select">
         <option value="">All cities</option>
-        <% (cities || []).forEach(city => { %>
-          <option value="<%= city %>" <%= String((selectedFilters || {}).city || "") === String(city) ? "selected" : "" %>>
+        <% (cities || []).forEach(city=> { %>
+          <option value="<%= city %>" <%=String((selectedFilters || {}).city || "" )===String(city) ? "selected" : "" %>
+            >
             <%= city %>
           </option>
-        <% }) %>
+          <% }) %>
       </select>
     </div>
 
@@ -18,11 +19,12 @@
       <label for="addressFilter" class="form-label">Address</label>
       <select id="addressFilter" name="address" class="form-select">
         <option value="">All addresses</option>
-        <% (addresses || []).forEach(address => { %>
-          <option value="<%= address %>" <%= String((selectedFilters || {}).address || "") === String(address) ? "selected" : "" %>>
+        <% (addresses || []).forEach(address=> { %>
+          <option value="<%= address %>" <%=String((selectedFilters || {}).address || "" )===String(address)
+            ? "selected" : "" %>>
             <%= address %>
           </option>
-        <% }) %>
+          <% }) %>
       </select>
     </div>
 
@@ -30,11 +32,12 @@
       <label for="categoryFilter" class="form-label">License category</label>
       <select id="categoryFilter" name="category_id" class="form-select">
         <option value="">All categories</option>
-        <% (categories || []).forEach(category => { %>
-          <option value="<%= category.id %>" <%= String((selectedFilters || {}).category_id || "") === String(category.id) ? "selected" : "" %>>
+        <% (categories || []).forEach(category=> { %>
+          <option value="<%= category.id %>" <%=String((selectedFilters || {}).category_id || "" )===String(category.id)
+            ? "selected" : "" %>>
             <%= category.name %>
           </option>
-        <% }) %>
+          <% }) %>
       </select>
     </div>
   </div>
@@ -47,17 +50,27 @@
 
   <% if (!(bookings || []).length) { %>
     <p>Broneeringuid ei leitud.</p>
-  <% } %>
+    <% } %>
 
-  <% (bookings || []).forEach(booking => { %>
-    <div class="card mb-3 p-3">
-      <strong><%= booking.time %></strong>
-      <p><%= booking.client %> - <%= booking.vehicle %></p>
-      <p><%= booking.service %></p>
-      <p><%= booking.city %>, <%= booking.address %></p>
-      <span><%= booking.status %></span>
-    </div>
-  <% }) %>
+      <% (bookings || []).forEach(booking=> { %>
+        <div class="card mb-3 p-3">
+          <strong>
+            <%= booking.time %>
+          </strong>
+          <p>
+            <%= booking.client %> - <%= booking.vehicle %>
+          </p>
+          <p>
+            <%= booking.service %>
+          </p>
+          <p>
+            <%= booking.city %>, <%= booking.address %>
+          </p>
+          <span>
+            <%= booking.status %>
+          </span>
+        </div>
+        <% }) %>
 </section>
 
 <section>
@@ -65,20 +78,22 @@
 
   <% if (!(workerCategories || []).length) { %>
     <p>Kategooriaid ei leitud.</p>
-  <% } %>
+    <% } %>
 
-  <% (workerCategories || []).forEach(category => { %>
-    <span class="badge bg-primary"><%= category.name || category %></span>
-  <% }) %>
+      <% (workerCategories || []).forEach(category=> { %>
+        <span class="badge bg-primary">
+          <%= category.name || category %>
+        </span>
+        <% }) %>
 </section>
 
-<script>
+<script nonce="<%= cspNonce %>">
   (function () {
     const citySelect = document.getElementById("cityFilter");
     const addressSelect = document.getElementById("addressFilter");
     if (!citySelect || !addressSelect) return;
 
-    const locations = <%- JSON.stringify(locations || []) %>;
+    const locations = <% - JSON.stringify(locations || []) %>;
     const selectedAddress = "<%= (selectedFilters || {}).address || '' %>";
 
     const cityToAddresses = locations.reduce((acc, loc) => {

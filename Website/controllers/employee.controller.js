@@ -73,7 +73,7 @@ const getEmployeePage = async (req, res, next) => {
             }
         });
     } catch (err) {
-        next(err);
+        return next(err);
     }
 };
 
@@ -101,13 +101,22 @@ const getSchedulePage = async (req, res, next) => {
             shifts: formattedShifts
         });
     } catch (err) {
-        next(err);
+        return next(err);
     }
 };
 
 const createSchedule = async (req, res, next) => {
     try {
         const { location_id, dates, start_time, end_time } = req.body;
+
+        if (!Array.isArray(dates) || dates.length === 0) {
+            return res.status(400).json({ message: "Vali vähemalt üks kuupäev" });
+        }
+
+        if (!location_id || !start_time || !end_time) {
+            return res.status(400).json({ message: "Puuduvad kohustuslikud väljad" });
+        }
+
         const workerId = await getWorkerIdForCurrentUser(req.user.id);
 
         for (const date of dates) {
@@ -134,19 +143,32 @@ const createSchedule = async (req, res, next) => {
             message: "Salvestatud"
         });
     } catch (err) {
-        next(err);
+        return next(err);
     }
 };
 
 const getScheduleForDay = async (req, res, next) => {
     try {
         const workerId = await getWorkerIdForCurrentUser(req.user.id);
+
+        if (!workerId) {
+            return res.status(404).json({ message: "Töötajat ei leitud" });
+        }
+
         const { date } = req.query;
+
+        if (!date) {
+            return res.status(400).json({ message: "Puudub kuupäev" });
+        }
+
+        if (isNaN(Date.parse(date))) {
+            return res.status(400).json({ message: "Vigane kuupäev" });
+        }
 
         const schedule = await workerShiftModel.getWorkerScheduleForDay(workerId, date);
         res.json(schedule);
     } catch (err) {
-        next(err);
+        return next(err);
     }
 };
 
@@ -154,6 +176,10 @@ const deleteSchedule = async (req, res, next) => {
     try {
         const workerId = await getWorkerIdForCurrentUser(req.user.id);
         const shiftId = req.params.id;
+
+        if (!Number.isInteger(shiftId)) {
+            return res.status(400).json({ message: "Vigane tööaja ID" });
+        }
 
         const shift = await workerShiftModel.getWorkerShiftById(shiftId);
 
@@ -181,15 +207,29 @@ const deleteSchedule = async (req, res, next) => {
 
         res.json({ message: "Tööaeg kustutatud" });
     } catch (err) {
-        next(err);
+        return next(err);
     }
 };
 
 const updateSchedule = async (req, res, next) => {
     try {
         const workerId = await getWorkerIdForCurrentUser(req.user.id);
+
+        if (!workerId) {
+            return res.status(404).json({ message: "Töötajat ei leitud" });
+        }
+
         const shiftId = req.params.id;
+
+        if (!Number.isInteger(shiftId)) {
+            return res.status(400).json({ message: "Vigane tööaja ID" });
+        }
+
         const { location_id, start_time, end_time } = req.body;
+
+        if (!location_id || !start_time || !end_time) {
+            return res.status(400).json({ message: "Puuduvad kohustuslikud väljad" });
+        }
 
         const shift = await workerShiftModel.getWorkerShiftById(shiftId);
 
@@ -216,7 +256,7 @@ const updateSchedule = async (req, res, next) => {
 
         res.json({ message: "Tööaeg uuendatud" });
     } catch (err) {
-        next(err);
+        return next(err);
     }
 };
 

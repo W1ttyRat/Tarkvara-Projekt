@@ -1,17 +1,17 @@
 const Booking = require('../models/booking.model');
 
-const getAllBookings = async (req, res) => {
+const getAllBookings = async (req, res, next) => {
     try {
         const rows = await Booking.getAllBookings();
         return res.status(200).json({ success: true, data: rows });
     } catch (error) {
-        return res.status(500).json({ success: false, error: error.message });
+        return next(error);
     }
 };
 
 // DB access delegated to models/Booking
 
-const createBooking = async (req, res) => {
+const createBooking = async (req, res, next) => {
     try {
         let client_id = parseInt(req.body.client_id, 10);
 
@@ -131,11 +131,11 @@ const createBooking = async (req, res) => {
             data: created
         });
     } catch (error) {
-        return res.status(500).json({ success: false, error: error.message });
+        return next(error);
     }
 };
 
-const cancelReservation = async (req, res) => {
+const cancelReservation = async (req, res, next) => {
     try {
         const reservationId = parseInt(req.params.id, 10); // ID tuleb URL-ist (nt /api/reservations/5/cancel)
 
@@ -159,7 +159,7 @@ const cancelReservation = async (req, res) => {
         });
 
     } catch (error) {
-        return res.status(500).json({ success: false, error: error.message });
+        return next(error);
     }
 };
 
@@ -168,7 +168,7 @@ const locationModel = require('../models/location.model');
 
 // POST /api/check-fit
 // body: { registration_number: string, locationId: number }
-const checkFit = async (req, res) => {
+const checkFit = async (req, res, next) => {
     try {
         const registration_number_raw = req.body.registration_number || '';
         const registration_number = registration_number_raw.trim();
@@ -187,7 +187,7 @@ const checkFit = async (req, res) => {
 
     } catch (err) {
         console.error('checkFit error', err);
-        return res.status(500).json({ fits: false, message: 'Serveri viga' });
+        return next(err);
     }
 };
 
