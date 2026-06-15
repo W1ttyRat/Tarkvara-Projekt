@@ -1,6 +1,8 @@
 const Booking = require('../models/booking.model');
-const bookingService = require('../services/email.service');
+const emailService = require('../services/email.service');
 
+const serviceModel = require('../models/service.model');
+const locationModel = require('../models/location.model');
 
 const getAllBookings = async (req, res) => {
     try {
@@ -101,7 +103,7 @@ const createBooking = async (req, res) => {
             comment
         });
 
-        await bookingService.sendBookingConfirmation(req.body.email, {
+        await emailService.sendBookingConfirmation(req.body.email, {
             name: req.body.client_name,
             registration_number: req.body.registration_number,
             location: req.body.location_name, 
@@ -148,8 +150,6 @@ const cancelReservation = async (req, res) => {
     }
 };
 
-const serviceModel = require('../models/service.model');
-const locationModel = require('../models/location.model');
 
 // POST /api/check-fit
 // body: { registration_number: string, locationId: number }
