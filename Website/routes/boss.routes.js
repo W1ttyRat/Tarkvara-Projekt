@@ -9,6 +9,19 @@ router.use(requireBoss); // All routes in this router require the user to be aut
 
 router.get('/', bossController.getBossPage);
 router.get('/register-employee', bossController.getRegisterEmployeePage);
+router.get("/schedule", bossController.getBossSchedulePage);
+router.get("/employees", bossController.getEmployeesPage);
 router.post('/register-employee', bossController.registerEmployee);
+
+router.patch(
+    "/schedule/:id/status",
+    bossController.updateShiftStatus
+);
+router.patch(
+    "/schedule/:id",
+    bossController.updateShift
+);
+
+//router.post('/register-employee', bossController.registerEmployee);
 
 module.exports = router;

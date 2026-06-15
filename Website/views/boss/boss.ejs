@@ -1,3 +1,58 @@
-<h1>bossi vaade</h1>
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Boss Dashboard</h1>
 
-<button onclick="window.location.href='/auth/logout'">Logi välja</button>
+            <% if (typeof user !== "undefined" && user) { %>
+                <p class="text-muted">
+                    Tere, <%= user.first_name %>!
+                </p>
+            <% } %>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-2">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title mb-3">Registreeri töötaja</h5>
+                    <p class="card-text text-muted">Lisa uus töötaja süsteemi</p>
+                    <a href="/boss/register-employee" class="btn btn-primary">
+                        Registreeri
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title mb-3">Vaata töötajaid</h5>
+                    <p class="card-text text-muted">Halda töötajate nimekirja</p>
+                    <a href="/boss/employees" class="btn btn-primary">
+                        Vaata
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title mb-3">Graafik</h5>
+                    <p class="card-text text-muted">Vaata ja kinnita tööaegu</p>
+                    <a href="/boss/schedule" class="btn btn-primary">
+                        Ava graafik
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form action="/auth/logout" method="POST" class="mt-4">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button class="btn btn-outline-danger" type="submit">
+            Logi välja
+        </button>
+    </form>
+</div>

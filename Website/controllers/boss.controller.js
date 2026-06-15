@@ -1,4 +1,7 @@
 const authService = require('../services/auth.service');
+const bossScheduleModel = require("../models/bossSchedule.model");
+const locationModel = require("../models/location.model");
+const User = require("../models/User.model");
 
 const getBossPage = async (req, res, next) => {
     try {
@@ -42,8 +45,111 @@ const registerEmployee = async (req, res, next) => {
     }
 }
 
+const getBossSchedulePage = async (req, res, next) => {
+    try {
+
+        const filters = {
+            location_id: req.query.location_id || "",
+            worker: req.query.worker || "",
+            status: req.query.status || ""
+        };
+        
+        const shifts =
+            await bossScheduleModel.getAllShiftsForBossCalendar(filters);
+        
+        const locations =
+            await locationModel.getAllLocations();
+        
+        res.render("boss/schedule", {
+            title: "Boss Schedule",
+            pageClass: "boss-schedule-page",
+            shifts,
+            locations,
+            filters
+        });
+
+    } catch (err) {
+        next(err);
+    }
+};
+
+const updateShiftStatus = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        if (!["approved", "rejected"].includes(status)) {
+            return res.status(400).json({
+                message: "Vale status"
+            });
+        }
+
+        const shift =
+            await bossScheduleModel.updateShiftStatus(
+                id,
+                status
+            );
+
+        res.json({
+            message: "Status uuendatud",
+            shift
+        });
+
+    } catch (err) {
+        next(err);
+    }
+};
+
+const updateShift = async (req, res, next) => {
+    try {
+
+        const shiftId = req.params.id;
+
+        const {
+            location_id,
+            start_time,
+            end_time
+        } = req.body;
+
+        const shift =
+            await bossScheduleModel.updateShift(
+                shiftId,
+                location_id,
+                start_time,
+                end_time
+            );
+
+        res.json({
+            message: "Vahetus uuendatud",
+            shift
+        });
+
+    } catch (err) {
+        next(err);
+    }
+};
+
+const getEmployeesPage = async (req, res, next) => {
+    try {
+        const employees = await User.getAllEmployees();
+
+        res.render("boss/employees", {
+            title: "Töötajad",
+            pageClass: "employees-page",
+            employees
+        });
+
+    } catch (err) {
+        next(err);
+    }
+};
+
 module.exports = {
     getBossPage,
     getRegisterEmployeePage,
-    registerEmployee
+    registerEmployee,
+    getBossSchedulePage,
+    updateShiftStatus,
+    updateShift,
+    getEmployeesPage
 };

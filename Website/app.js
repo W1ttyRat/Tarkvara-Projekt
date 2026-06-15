@@ -112,6 +112,14 @@ app.use((err, req, res, next) => {
     }
     next(err);
 });
+//ajutine
+app.use((err, req, res, next) => {
+    console.error("ERROR:", err);
+    console.error("MESSAGE:", err.message);
+    console.error("STACK:", err.stack);
+
+    res.status(err.statusCode || 500).send(err.message || "Server error");
+});
 
 //error handling middleware
 app.use(errorHandler);
