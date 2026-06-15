@@ -139,6 +139,7 @@ class BookingModel {
 
         const { rows } = await this.pool.query(query, values);
         return rows;
+    }
     // Helper: get vehicle by id
     async getVehicleById(vehicleId) {
         const res = await this.pool.query(
