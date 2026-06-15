@@ -97,18 +97,11 @@ const getSchedulePage = async (req, res, next) => {
 
 const createSchedule = async (req, res, next) => {
     try {
-        const {
-            location_id,
-            dates,
-            start_time,
-            end_time
-        } = req.body;
-
+        const { location_id, dates, start_time, end_time } = req.body;
         const workerId = await getWorkerIdForCurrentUser(req.user.id);
 
         for (const date of dates) {
-            const alreadyHasShift =
-                await workerShiftModel.hasWorkerShiftOnDate(workerId, date);
+            const alreadyHasShift = await workerShiftModel.hasWorkerShiftOnDate(workerId, date);
 
             if (alreadyHasShift) {
                 return res.status(400).json({
@@ -116,11 +109,8 @@ const createSchedule = async (req, res, next) => {
                 });
             }
 
-            const startTimestamp =
-                `${date} ${start_time}:00`;
-
-            const endTimestamp =
-                `${date} ${end_time}:00`;
+            const startTimestamp = `${date} ${start_time}:00`;
+            const endTimestamp = `${date} ${end_time}:00`;
 
             await workerShiftModel.createWorkerShift(
                 workerId,
@@ -133,7 +123,6 @@ const createSchedule = async (req, res, next) => {
         res.status(201).json({
             message: "Salvestatud"
         });
-
     } catch (err) {
         next(err);
     }
@@ -141,13 +130,11 @@ const createSchedule = async (req, res, next) => {
 
 const getScheduleForDay = async (req, res, next) => {
     try {
+        const workerId = await getWorkerIdForCurrentUser(req.user.id);
         const { date } = req.query;
 
-        const schedule =
-            await workerShiftModel.getScheduleForDay(date);
-
+        const schedule = await workerShiftModel.getWorkerScheduleForDay(workerId, date);
         res.json(schedule);
-
     } catch (err) {
         next(err);
     }
@@ -155,21 +142,17 @@ const getScheduleForDay = async (req, res, next) => {
 
 const deleteSchedule = async (req, res, next) => {
     try {
-        const workerId = 1; // hiljem tuleb sisseloginud kasutajast
+        const workerId = await getWorkerIdForCurrentUser(req.user.id);
         const shiftId = req.params.id;
 
         const shift = await workerShiftModel.getWorkerShiftById(shiftId);
 
         if (!shift) {
-            return res.status(404).json({
-                message: "Tööaega ei leitud"
-            });
+            return res.status(404).json({ message: "Tööaega ei leitud" });
         }
 
         if (shift.worker_id !== workerId) {
-            return res.status(403).json({
-                message: "Saad kustutada ainult enda tööaegu"
-            });
+            return res.status(403).json({ message: "Saad kustutada ainult enda tööaegu" });
         }
 
         const now = new Date();
@@ -186,10 +169,39 @@ const deleteSchedule = async (req, res, next) => {
 
         await workerShiftModel.deleteWorkerShift(shiftId);
 
-        res.json({
-            message: "Tööaeg kustutatud"
-        });
+        res.json({ message: "Tööaeg kustutatud" });
+    } catch (err) {
+        next(err);
+    }
+};
 
+const updateSchedule = async (req, res, next) => {
+    try {
+        const workerId = await getWorkerIdForCurrentUser(req.user.id);
+        const shiftId = req.params.id;
+        const { location_id, start_time, end_time } = req.body;
+
+        const shift = await workerShiftModel.getWorkerShiftById(shiftId);
+
+        if (!shift) {
+            return res.status(404).json({ message: "Tööaega ei leitud" });
+        }
+
+        if (shift.worker_id !== workerId) {
+            return res.status(403).json({ message: "Saad muuta ainult enda tööaegu" });
+        }
+
+        // Extract date from existing shift
+        const shiftDateStr = shift.start_time.toISOString
+            ? shift.start_time.toISOString().split('T')[0]
+            : shift.start_time.split(' ')[0];
+
+        const startTimestamp = `${shiftDateStr} ${start_time}:00`;
+        const endTimestamp = `${shiftDateStr} ${end_time}:00`;
+
+        await workerShiftModel.updateWorkerShift(shiftId, location_id, startTimestamp, endTimestamp);
+
+        res.json({ message: "Tööaeg uuendatud" });
     } catch (err) {
         next(err);
     }
@@ -200,5 +212,6 @@ module.exports = {
     getSchedulePage,
     createSchedule,
     getScheduleForDay,
-    deleteSchedule
+    deleteSchedule,
+    updateSchedule
 };

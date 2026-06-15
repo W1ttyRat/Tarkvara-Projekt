@@ -31,10 +31,10 @@ const createWorkerShift = async (workerId, locationId, startTime, endTime) => {
     );
 };
 
-const getScheduleForDay = async (date) => {
+const getWorkerScheduleForDay = async (workerId, date) => {
     const result = await pool.query(
         `
-        SELECT 
+        SELECT
             ws.id,
             TO_CHAR(ws.start_time, 'HH24:MI') AS start_time,
             TO_CHAR(ws.end_time, 'HH24:MI') AS end_time,
@@ -44,11 +44,12 @@ const getScheduleForDay = async (date) => {
         FROM worker_shift ws
         JOIN worker w ON ws.worker_id = w.id
         JOIN location l ON ws.location_id = l.id
-        WHERE ws.start_time >= $1::date
-          AND ws.start_time < ($1::date + INTERVAL '1 day')
+        WHERE ws.worker_id = $1
+          AND ws.start_time >= $2::date
+          AND ws.start_time < ($2::date + INTERVAL '1 day')
         ORDER BY ws.start_time
         `,
-        [date]
+        [workerId, date]
     );
 
     return result.rows;
@@ -93,11 +94,23 @@ const hasWorkerShiftOnDate = async (workerId, date) => {
     return result.rows.length > 0;
 };
 
+const updateWorkerShift = async (shiftId, locationId, startTime, endTime) => {
+    await pool.query(
+        `
+        UPDATE worker_shift
+        SET location_id = $1, start_time = $2, end_time = $3
+        WHERE id = $4
+        `,
+        [locationId, startTime, endTime, shiftId]
+    );
+};
+
 module.exports = {
     getWorkerShifts,
     createWorkerShift,
-    getScheduleForDay,
+    getWorkerScheduleForDay,
     getWorkerShiftById,
     deleteWorkerShift,
-    hasWorkerShiftOnDate
+    hasWorkerShiftOnDate,
+    updateWorkerShift
 };
