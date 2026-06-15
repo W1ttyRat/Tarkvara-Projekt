@@ -55,6 +55,30 @@ const createBooking = async (req, res) => {
             });
         }
 
+        // validate start/end times before DB queries
+        if (!start_time || !end_time) {
+            return res.status(400).json({ success: false, message: 'Palun lisa algus- ja lõppkuupäev.' });
+        }
+        const startDt = new Date(start_time);
+        const endDt = new Date(end_time);
+        if (isNaN(startDt.getTime()) || isNaN(endDt.getTime())) {
+            return res.status(400).json({ success: false, message: 'Kuupäevade formaat on vigane.' });
+        }
+        if (endDt <= startDt) {
+            return res.status(400).json({ success: false, message: 'Lõpp-aeg peab olema hilisem kui algusaeg.' });
+        }
+
+        // Server-side fit check: ensure vehicle fits selected location doors
+        try {
+            const fitResult = await Booking.checkVehicleFit(vehicle_id, location_id);
+            if (!fitResult.fits) {
+                return res.status(400).json({ success: false, message: fitResult.message });
+            }
+        } catch (err) {
+            console.error('server-side fit check error', err);
+            return res.status(500).json({ success: false, message: 'Serveri viga mõõtude kontrollimisel' });
+        }
+
         // Topelt broneeringu kontroll via model
         const overlaps = await Booking.checkOverlap(start_time, end_time);
 
@@ -117,6 +141,31 @@ const cancelReservation = async (req, res) => {
 const serviceModel = require('../models/service.model');
 const locationModel = require('../models/location.model');
 
+// POST /api/check-fit
+// body: { registration_number: string, locationId: number }
+const checkFit = async (req, res) => {
+    try {
+        const registration_number_raw = req.body.registration_number || '';
+        const registration_number = registration_number_raw.trim();
+        const locationId = parseInt(req.body.locationId, 10);
+
+        if (!registration_number) {
+            return res.status(400).json({ fits: false, message: 'Sisesta registreerimisnumber.' });
+        }
+        if (isNaN(locationId)) {
+            return res.status(400).json({ fits: false, message: 'Vali asukoht.' });
+        }
+
+        // use model method for fit check
+        const fitResult = await Booking.checkVehicleFitByRegistration(registration_number, locationId);
+        return res.json({ fits: fitResult.fits, message: fitResult.message || undefined });
+
+    } catch (err) {
+        console.error('checkFit error', err);
+        return res.status(500).json({ fits: false, message: 'Serveri viga' });
+    }
+};
+
 const getBookingPage = async (req, res, next) => {
     try {
         const service = await serviceModel.getAllServices();
@@ -138,5 +187,6 @@ module.exports = {
     getAllBookings,
     createBooking,
     cancelReservation,
-    getBookingPage
+    getBookingPage,
+    checkFit
 };
