@@ -43,6 +43,24 @@ class UserModel {
         const { rows } = await pool.query(query, [userId]);
         return rows[0]?.session_version;
     }
+
+    async getAllEmployees() {
+        const query = `
+            SELECT
+                id,
+                first_name,
+                last_name,
+                username,
+                role
+            FROM users
+            WHERE role = 'employee'
+            ORDER BY first_name, last_name
+        `;
+    
+        const { rows } = await pool.query(query);
+    
+        return rows;
+    }
 }
 
 module.exports = new UserModel();

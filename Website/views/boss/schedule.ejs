@@ -1,0 +1,140 @@
+<h1>Bossi graafiku vaade</h1>
+
+<form method="GET" action="/boss/schedule" class="boss-filters">
+
+    <select name="location_id">
+        <option value="">
+            Kõik ülevaatuspunktid
+        </option>
+
+        <% locations.forEach(location => { %>
+
+            <option
+                value="<%= location.id %>"
+                <%= filters.location_id == location.id ? "selected" : "" %>
+            >
+                <%= location.city %>,
+                <%= location.address %>
+            </option>
+
+        <% }) %>
+
+    </select>
+
+    <input
+        type="text"
+        name="worker"
+        placeholder="Töötaja nimi"
+        value="<%= filters.worker %>"
+    >
+
+    <select name="status">
+
+        <option value="">
+            Kõik staatused
+        </option>
+
+        <option
+            value="pending"
+            <%= filters.status === "pending" ? "selected" : "" %>
+        >
+            Ootel
+        </option>
+
+        <option
+            value="approved"
+            <%= filters.status === "approved" ? "selected" : "" %>
+        >
+            Kinnitatud
+        </option>
+
+        <option
+            value="rejected"
+            <%= filters.status === "rejected" ? "selected" : "" %>
+        >
+            Tagasi lükatud
+        </option>
+
+    </select>
+
+    <button type="submit">
+        Filtreeri
+    </button>
+
+    <a href="/boss/schedule">
+        Tühjenda filtrid
+    </a>
+
+</form>
+
+<div class="boss-schedule-layout">
+
+    <section>
+
+        <div class="calendar-header">
+            <button id="prevMonth" type="button">&lt;</button>
+            <h2 id="monthTitle"></h2>
+            <button id="nextMonth" type="button">&gt;</button>
+        </div>
+
+        <div class="calendar-legend">
+            <span><b class="legend-pending"></b> Ootel</span>
+            <span><b class="legend-approved"></b> Kinnitatud</span>
+            <span><b class="legend-rejected"></b> Keeldutud</span>
+        </div>
+
+        <div class="calendar-weekdays">
+            <div>E</div>
+            <div>T</div>
+            <div>K</div>
+            <div>N</div>
+            <div>R</div>
+            <div>L</div>
+            <div>P</div>
+        </div>
+
+        <div
+            id="bossCalendarGrid"
+            class="calendar-grid"
+        ></div>
+
+    </section>
+
+    <aside class="schedule-sidebar">
+
+        <h3>Valitud päev</h3>
+
+        <p id="selectedBossDate">
+            Vali kalendrist päev
+        </p>
+
+        <div id="bossDaySchedule"></div>
+
+    </aside>
+
+</div>
+
+<script>
+    window.bossShifts =
+        <%- JSON.stringify(shifts) %>;
+</script>
+
+<script>
+    window.locations =
+        <%- JSON.stringify(locations) %>;
+</script>
+
+<script>
+    window.csrfToken =
+        "<%= csrfToken %>";
+</script>
+
+<link
+    rel="stylesheet"
+    href="/css/pages/bossSchedule.css"
+>
+
+<script
+    src="/js/bossSchedule.js"
+    defer
+></script>
