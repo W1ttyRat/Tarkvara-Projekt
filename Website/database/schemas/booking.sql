@@ -133,42 +133,37 @@ CREATE TABLE service (
 );
 
 CREATE TABLE reservation (
-    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    client_id INTEGER NOT NULL,
-    vehicle_id INTEGER NOT NULL,
-    location_id INTEGER NOT NULL,
-    service_id INTEGER NOT NULL,
-    start_time TIMESTAMP NOT NULL,
-    end_time TIMESTAMP NOT NULL,
-    status VARCHAR(30) NOT NULL DEFAULT 'pending',
-    comment TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  id integer GENERATED ALWAYS AS IDENTITY NOT NULL,
+  client_id integer NOT NULL,
+  vehicle_id integer NOT NULL,
+  worker_id integer NOT NULL,
+  location_id integer NOT NULL,
+  service_id integer NOT NULL,
+  start_time timestamp without time zone NOT NULL,
+  end_time timestamp without time zone NOT NULL,
+  status character varying NOT NULL DEFAULT 'pending'
+    CHECK (status::text = ANY (ARRAY[
+      'pending'::character varying,
+      'confirmed'::character varying,
+      'cancelled'::character varying,
+      'completed'::character varying
+    ]::text[])),
+  comment text,
+  created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_reservation_client
-        FOREIGN KEY (client_id)
-        REFERENCES client(id),
-
-    CONSTRAINT fk_reservation_vehicle
-        FOREIGN KEY (vehicle_id)
-        REFERENCES vehicle(id),
-
-    CONSTRAINT fk_reservation_worker
-        FOREIGN KEY (worker_id)
-        REFERENCES worker(id),
-
-    CONSTRAINT fk_reservation_location
-        FOREIGN KEY (location_id)
-        REFERENCES location(id),
-
-    CONSTRAINT fk_reservation_service
-        FOREIGN KEY (service_id)
-        REFERENCES service(id),
-
-    CONSTRAINT chk_reservation_time
-        CHECK (end_time > start_time),
-
-    CONSTRAINT chk_reservation_status
-        CHECK (status IN ('pending', 'confirmed', 'cancelled', 'completed'))
+  CONSTRAINT reservation_pkey PRIMARY KEY (id),
+  CONSTRAINT fk_reservation_client
+    FOREIGN KEY (client_id) REFERENCES public.client(id),
+  CONSTRAINT fk_reservation_vehicle
+    FOREIGN KEY (vehicle_id) REFERENCES public.vehicle(id),
+  CONSTRAINT fk_reservation_worker
+    FOREIGN KEY (worker_id) REFERENCES public.worker(id),
+  CONSTRAINT fk_reservation_location
+    FOREIGN KEY (location_id) REFERENCES public.location(id),
+  CONSTRAINT fk_reservation_service
+    FOREIGN KEY (service_id) REFERENCES public.service(id),
+  CONSTRAINT chk_reservation_time
+    CHECK (end_time > start_time)
 );
 
 CREATE TABLE unavailable_time (

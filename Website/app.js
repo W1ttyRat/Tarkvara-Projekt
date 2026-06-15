@@ -19,8 +19,6 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 // configure CORS before csurf so preflight/headers are set
 app.use(cors({
@@ -63,12 +61,6 @@ app.use(helmet({
     contentSecurityPolicy: false,
 }));
 
-// configure CORS
-app.use(cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-    credentials: true, // allow cookies
-}));
-
 // configure morgan for logging
 // 'dev' format shows: METHOD URL STATUS RESPONSE_TIME
 app.use(morgan('dev'));
@@ -93,7 +85,6 @@ app.get('/', (req, res) => {
 });
 
 const bookingRoutes = require('./routes/booking.routes');
-app.use(express.urlencoded({ extended: true }));
 app.use("/", bookingRoutes);
 
 const authRoutes = require('./routes/auth.routes');
@@ -110,10 +101,6 @@ app.use((req, res, next) => {
     err.statusCode = 404;
     next(err);
 });
-//error handling middleware
-app.use(errorHandler);
-
-// export app for testing or start server (server.js)
 
 // error handler for CSRF to return JSON for API routes
 app.use((err, req, res, next) => {
@@ -126,4 +113,8 @@ app.use((err, req, res, next) => {
     next(err);
 });
 
+//error handling middleware
+app.use(errorHandler);
+
+// export app for testing or start server (server.js)
 module.exports = app;

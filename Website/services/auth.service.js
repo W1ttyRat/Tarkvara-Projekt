@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/User.model');
+const Worker = require('../models/worker.model');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const RefreshToken = require('../models/RefreshToken.model');
@@ -78,7 +79,17 @@ class AuthService {
         }
 
         const passwordHash = await bcrypt.hash(password, 10);
-        return User.createUser(first_name, last_name, username, passwordHash, role);
+        const user = await User.createUser(first_name, last_name, username, passwordHash, role);
+
+        if (role === 'employee') {
+            await Worker.createWorker({
+                name: `${first_name} ${last_name}`,
+                email: null,
+                phone: null,
+                user_id: user.id
+            });
+        }
+        return user;
     }
 
     async loginUser({ username, password }) {
