@@ -14,7 +14,31 @@ const createWorker = async ({ name, email = null, phone = null, user_id }) => {
     return result.rows[0] || null;
 }
 
+const getWorkerCategories = async (workerId) => {
+    const query = `
+    SELECT lc.id, lc.name, lc.code
+    FROM worker_licence_category wlc
+    JOIN licence_category lc ON wlc.licence_category_id = lc.id
+    WHERE wlc.worker_id = $1
+    ORDER BY lc.name
+    `;
+    const { rows } = await pool.query(query, [workerId]);
+    return rows;
+}
+
+const getAllLicenceCategories = async () => {
+    const query = `
+        SELECT id, code, name
+        FROM licence_category
+        ORDER BY name
+    `;
+    const { rows } = await pool.query(query);
+    return rows;
+};
+
 module.exports = {
     getWorkerByUserId,
-    createWorker
+    createWorker,
+    getWorkerCategories,
+    getAllLicenceCategories
 };

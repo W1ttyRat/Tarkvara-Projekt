@@ -2,48 +2,50 @@ const calendarGrid = document.getElementById("calendarGrid");
 const monthTitle = document.getElementById("monthTitle");
 const selectedDatesList = document.getElementById("selectedDates");
 const confirmBtn = document.getElementById("confirmBtn");
-const workerShifts =
-    window.workerShifts || [];
+const workerShifts = window.workerShifts || [];
 
 let currentDate = new Date();
 currentDate.setDate(1);
 let selectedDates = [];
 let selectedStartTime = null;
 let selectedEndTime = null;
+let editingShiftId = null;
 
 const unavailableDays = [];
 
 const citySelect = document.getElementById("citySelect");
 const locationSelect = document.getElementById("locationSelect");
 
-citySelect.addEventListener("change", () => {
+if (citySelect && locationSelect) {
+  citySelect.addEventListener("change", () => {
     const selectedCity = citySelect.value;
 
     locationSelect.innerHTML = "";
 
     if (!selectedCity) {
-        locationSelect.disabled = true;
-        locationSelect.innerHTML = `<option value="">Vali esmalt linn</option>`;
-        updateConfirmButton();
-        return;
+      locationSelect.disabled = true;
+      locationSelect.innerHTML = `<option value="">Vali esmalt linn</option>`;
+      updateConfirmButton();
+      return;
     }
 
-    const matchingLocations = window.locations.filter(location => {
-        return location.city === selectedCity;
+    const matchingLocations = (window.locations || []).filter(location => {
+      return location.city === selectedCity;
     });
 
     locationSelect.disabled = false;
     locationSelect.innerHTML = `<option value="">Vali ülevaatuspunkt</option>`;
 
     matchingLocations.forEach(location => {
-        const option = document.createElement("option");
-        option.value = location.id;
-        option.textContent = location.address;
-        locationSelect.appendChild(option);
+      const option = document.createElement("option");
+      option.value = location.id;
+      option.textContent = location.address;
+      locationSelect.appendChild(option);
     });
 
     updateConfirmButton();
-});
+  });
+}
 
 const monthNames = [
   "Jaanuar", "Veebruar", "Märts", "Aprill", "Mai", "Juuni",
@@ -53,6 +55,8 @@ const monthNames = [
 const times = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
 
 function renderCalendar() {
+  if (!calendarGrid) return;
+
   calendarGrid.innerHTML = "";
 
   const year = currentDate.getFullYear();
@@ -106,24 +110,22 @@ function createDay(day, otherMonth) {
   }
 
   const dateKey = getDateKey(day);
-  const shift = workerShifts.find(s => {
-    return s.start_time.startsWith(dateKey);
-  });
+  const shift = workerShifts.find(s => s.start_time && s.start_time.startsWith(dateKey));
 
   if (isPastDate(day) || unavailableDays.includes(day)) {
+    dayEl.classList.add("unavailable");
+    dayEl.innerHTML += `<small>Pole saadaval</small>`;
 
-        dayEl.classList.add("unavailable");
-        dayEl.innerHTML += `<small>Pole saadaval</small>`;
+    dayEl.addEventListener("click", () => {
+      loadDaySchedule(dateKey);
+    });
 
-        dayEl.addEventListener("click", () => {
-            loadDaySchedule(dateKey);
-        });
-
-        calendarGrid.appendChild(dayEl);
-        return;
+    calendarGrid.appendChild(dayEl);
+    return;
   }
 
   if (shift) {
+    dayEl.style.backgroundColor = "#ffd54f";
 
     if (shift.status === "approved") {
         dayEl.style.backgroundColor = "#a9d8b8";
@@ -133,14 +135,13 @@ function createDay(day, otherMonth) {
         dayEl.style.backgroundColor = "#ffd54f";
     }
 
-    const start =
-        shift.start_time.substring(11, 16);
-
-    const end =
-        shift.end_time.substring(11, 16);
+    const start = shift.start_time.substring(11, 16);
+    const end = shift.end_time.substring(11, 16);
 
     dayEl.innerHTML += `
       <small>
+        ${start}-${end}<br>
+        ${shift.address || ""}
           ${start}-${end}<br>
           ${shift.address}<br>
           ${shift.status}
@@ -154,6 +155,7 @@ function createDay(day, otherMonth) {
 
   dayEl.addEventListener("click", () => {
     loadDaySchedule(dateKey);
+
     if (selectedDates.includes(dateKey)) {
       selectedDates = selectedDates.filter(date => date !== dateKey);
     } else {
@@ -176,6 +178,8 @@ function getDateKey(day) {
 }
 
 function renderSelectedDates() {
+  if (!selectedDatesList) return;
+
   selectedDatesList.innerHTML = "";
 
   selectedDates.forEach(date => {
@@ -187,6 +191,8 @@ function renderSelectedDates() {
 
 function renderTimeButtons(containerId, type) {
   const container = document.getElementById(containerId);
+  if (!container) return;
+
   container.innerHTML = "";
 
   times.forEach(time => {
@@ -209,7 +215,9 @@ function renderTimeButtons(containerId, type) {
 }
 
 function updateConfirmButton() {
-  const locationSelected = document.getElementById("locationSelect").value !== "";
+  if (!confirmBtn) return;
+
+  const locationSelected = locationSelect && locationSelect.value !== "";
 
   confirmBtn.disabled = !(
     selectedDates.length > 0 &&
@@ -219,123 +227,224 @@ function updateConfirmButton() {
   );
 }
 
-async function loadDaySchedule(dateKey) {
-    const list = document.getElementById("daySchedule");
-    list.innerHTML = "<li>Laen...</li>";
+function setTimeButtonSelection(containerId, time) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
 
-    const response = await fetch(`/employee/schedule/day?date=${dateKey}`);
-    const shifts = await response.json();
+  [...container.children].forEach(btn => {
+    btn.classList.toggle("active", btn.textContent === time);
+  });
+}
 
-    if (shifts.length === 0) {
-        list.innerHTML = "<li>Sel päeval pole kedagi tööl</li>";
-        return;
+function fillTimeSelection(type, timeValue) {
+  if (type === "start") {
+    selectedStartTime = timeValue;
+    setTimeButtonSelection("startTimes", timeValue);
+  }
+
+  if (type === "end") {
+    selectedEndTime = timeValue;
+    setTimeButtonSelection("endTimes", timeValue);
+  }
+
+  updateConfirmButton();
+}
+
+function normalizeTime(value) {
+  if (!value) return "";
+  return value.length >= 5 ? value.slice(0, 5) : value;
+}
+
+async function startEditingShift(shift) {
+  editingShiftId = shift.id;
+
+  const city = shift.location_city;
+  const address = shift.location_address;
+
+  if (citySelect) {
+    citySelect.value = city || "";
+    citySelect.dispatchEvent(new Event("change"));
+  }
+
+  if (locationSelect) {
+    const matchingLocation = (window.locations || []).find(location => {
+      return location.city === city && location.address === address;
+    });
+
+    if (matchingLocation) {
+      locationSelect.value = String(matchingLocation.id);
     }
+  }
 
-    list.innerHTML = "";
+  fillTimeSelection("start", normalizeTime(shift.start_time));
+  fillTimeSelection("end", normalizeTime(shift.end_time));
+
+  if (selectedDatesList) {
+    selectedDatesList.innerHTML = `<li>Muudan: ${shift.start_time.slice(0, 10)}</li>`;
+  }
+
+  if (confirmBtn) {
+    confirmBtn.textContent = "Uuenda";
+  }
+
+  updateConfirmButton();
+}
+
+async function loadDaySchedule(dateKey) {
+  const list = document.getElementById("daySchedule");
+  if (!list) return;
+
+  list.innerHTML = "<li>Laen...</li>";
+
+  const response = await fetch(`/employee/schedule/day?date=${dateKey}`);
+  const shifts = await response.json();
+
+  if (!Array.isArray(shifts) || shifts.length === 0) {
+    list.innerHTML = "<li>Sel päeval pole töögraafikut</li>";
+    return;
+  }
+
+  list.innerHTML = "";
 
   shifts.forEach(shift => {
     const li = document.createElement("li");
 
-    li.textContent = `${shift.start_time}-${shift.end_time} | ${shift.worker_name} | ${shift.location_city}, ${shift.location_address} `;
+    const info = document.createElement("span");
+    info.textContent = `${shift.start_time}-${shift.end_time} | ${shift.worker_name} | ${shift.location_city}, ${shift.location_address}`;
 
-    const deleteBtn = document.createElement("button");
-    deleteBtn.textContent = "Kustuta";
-    deleteBtn.type = "button";
+    const editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.textContent = "Muuda";
+    editBtn.className = "edit-shift-btn";
 
-    deleteBtn.addEventListener("click", async () => {
-        const confirmed = confirm("Kas oled kindel, et soovid selle tööaja kustutada?");
-
-        if (!confirmed) return;
-
-        try {
-            const response = await fetch(`/employee/schedule/${shift.id}`, {
-                method: "DELETE",
-                headers: {
-                    "CSRF-Token": window.csrfToken
-                }
-            });
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                alert(result.message || "Kustutamine ebaõnnestus");
-                return;
-            }
-
-            alert("Tööaeg kustutatud");
-            window.location.reload();
-
-        } catch (error) {
-            console.error(error);
-            alert("Kustutamine ebaõnnestus");
-        }
+    editBtn.addEventListener("click", () => {
+      startEditingShift(shift);
     });
 
-    li.appendChild(deleteBtn);
+    li.appendChild(info);
+    li.appendChild(editBtn);
     list.appendChild(li);
   });
 }
 
-document.getElementById("prevMonth").addEventListener("click", () => {
-  currentDate.setMonth(currentDate.getMonth() - 1);
-  selectedDates = [];
-  renderCalendar();
-  renderSelectedDates();
-  updateConfirmButton();
-});
+const prevMonthBtn = document.getElementById("prevMonth");
+const nextMonthBtn = document.getElementById("nextMonth");
+const clearBtn = document.getElementById("clearBtn");
 
-document.getElementById("nextMonth").addEventListener("click", () => {
-  currentDate.setMonth(currentDate.getMonth() + 1);
-  selectedDates = [];
-  renderCalendar();
-  renderSelectedDates();
-  updateConfirmButton();
-});
+if (prevMonthBtn) {
+  prevMonthBtn.addEventListener("click", () => {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    selectedDates = [];
+    editingShiftId = null;
+    renderCalendar();
+    renderSelectedDates();
+    if (confirmBtn) {
+      confirmBtn.textContent = "Kinnita";
+    }
+    updateConfirmButton();
+  });
+}
 
-document.getElementById("clearBtn").addEventListener("click", () => {
-  selectedDates = [];
-  selectedStartTime = null;
-  selectedEndTime = null;
-  renderCalendar();
-  renderSelectedDates();
-  updateConfirmButton();
-});
+if (nextMonthBtn) {
+  nextMonthBtn.addEventListener("click", () => {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    selectedDates = [];
+    editingShiftId = null;
+    renderCalendar();
+    renderSelectedDates();
+    if (confirmBtn) {
+      confirmBtn.textContent = "Kinnita";
+    }
+    updateConfirmButton();
+  });
+}
 
-document.getElementById("locationSelect").addEventListener("change", updateConfirmButton);
+if (clearBtn) {
+  clearBtn.addEventListener("click", () => {
+    selectedDates = [];
+    selectedStartTime = null;
+    selectedEndTime = null;
+    editingShiftId = null;
 
-confirmBtn.addEventListener("click", async () => {
-    const data = {
-        location_id: document.getElementById("locationSelect").value,
-        dates: selectedDates,
-        start_time: selectedStartTime,
-        end_time: selectedEndTime
-    };
+    if (confirmBtn) {
+      confirmBtn.textContent = "Kinnita";
+    }
 
+    renderCalendar();
+    renderSelectedDates();
+    updateConfirmButton();
+  });
+}
+
+if (locationSelect) {
+  locationSelect.addEventListener("change", updateConfirmButton);
+}
+
+if (confirmBtn) {
+  confirmBtn.addEventListener("click", async () => {
     try {
+      if (editingShiftId) {
+        // Update mode
+        const payload = {
+          location_id: locationSelect ? locationSelect.value : "",
+          start_time: selectedStartTime,
+          end_time: selectedEndTime
+        };
+
+        const response = await fetch(`/employee/schedule/${editingShiftId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "CSRF-Token": window.csrfToken
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          alert(result.message || "Tööaja uuendamine ebaõnnestus");
+          return;
+        }
+
+        alert(result.message || "Tööaeg uuendatud");
+        editingShiftId = null;
+        confirmBtn.textContent = "Kinnita";
+        window.location.reload();
+      } else {
+        // Create mode
+        const data = {
+          location_id: locationSelect ? locationSelect.value : "",
+          dates: selectedDates,
+          start_time: selectedStartTime,
+          end_time: selectedEndTime
+        };
+
         const response = await fetch("/employee/schedule", {
           method: "POST",
           headers: {
-              "Content-Type": "application/json",
-              "CSRF-Token": window.csrfToken
+            "Content-Type": "application/json",
+            "CSRF-Token": window.csrfToken
           },
           body: JSON.stringify(data)
-      });
+        });
 
-      const result = await response.json();
+        const result = await response.json();
 
-      if (!response.ok) {
+        if (!response.ok) {
           alert(result.message || "Tööaja salvestamine ebaõnnestus");
           return;
+        }
+
+        alert(result.message || "Tööaeg salvestatud");
+        window.location.reload();
       }
-
-      alert(result.message || "Tööaeg salvestatud");
-      window.location.reload();
     } catch (error) {
-        console.error(error);
-        alert("Tööaja salvestamine ebaõnnestus");
+      console.error(error);
+      alert("Tööaja salvestamine ebaõnnestus");
     }
-});
-
+  });
+}
 
 renderCalendar();
 renderTimeButtons("startTimes", "start");
