@@ -5,8 +5,8 @@ const getWorkerShifts = async (workerId) => {
         `
         SELECT
             ws.id,
-            ws.start_time,
-            ws.end_time,
+            TO_CHAR(ws.start_time, 'YYYY-MM-DD HH24:MI') AS start_time,
+            TO_CHAR(ws.end_time, 'YYYY-MM-DD HH24:MI') AS end_time,
             ws.status,
             l.city,
             l.address

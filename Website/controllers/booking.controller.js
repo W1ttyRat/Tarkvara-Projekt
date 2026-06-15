@@ -49,9 +49,9 @@ const createBooking = async (req, res) => {
         }
 
         if (isNaN(client_id) || isNaN(vehicle_id) || isNaN(service_id) || isNaN(location_id)) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Vigased andmed. Kõik ID-väärtused peavad olema numbrid!' 
+            return res.status(400).json({
+                success: false,
+                message: 'Vigased andmed. Kõik ID-väärtused peavad olema numbrid!'
             });
         }
 
@@ -59,12 +59,23 @@ const createBooking = async (req, res) => {
         if (!start_time || !end_time) {
             return res.status(400).json({ success: false, message: 'Palun lisa algus- ja lõppkuupäev.' });
         }
-        const startDt = new Date(start_time);
-        const endDt = new Date(end_time);
-        if (isNaN(startDt.getTime()) || isNaN(endDt.getTime())) {
+
+        if (!start_time || !end_time) {
+            return res.status(400).json({ success: false, message: 'Palun lisa algus- ja lõppkuupäev.' });
+        }
+
+        if (typeof start_time !== 'string' || typeof end_time !== 'string') {
             return res.status(400).json({ success: false, message: 'Kuupäevade formaat on vigane.' });
         }
-        if (endDt <= startDt) {
+
+        const startValue = start_time.trim();
+        const endValue = end_time.trim();
+
+        if (!startValue || !endValue) {
+            return res.status(400).json({ success: false, message: 'Kuupäevade formaat on vigane.' });
+        }
+
+        if (endValue <= startValue) {
             return res.status(400).json({ success: false, message: 'Lõpp-aeg peab olema hilisem kui algusaeg.' });
         }
 
@@ -83,9 +94,9 @@ const createBooking = async (req, res) => {
         const overlaps = await Booking.checkOverlap(start_time, end_time);
 
         if (overlaps.length > 0) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'See töötaja on valitud ajavahemikus juba hõivatud!' 
+            return res.status(400).json({
+                success: false,
+                message: 'See töötaja on valitud ajavahemikus juba hõivatud!'
             });
         }
 
@@ -94,13 +105,13 @@ const createBooking = async (req, res) => {
             vehicle_id,
             location_id,
             service_id,
-            start_time,
-            end_time,
+            start_time: start_time.trim(),
+            end_time: end_time.trim(),
             comment
         });
 
-        return res.status(201).json({ 
-            success: true, 
+        return res.status(201).json({
+            success: true,
             message: 'Broneering edukalt loodud!',
             data: created
         });
@@ -121,16 +132,16 @@ const cancelReservation = async (req, res) => {
         const cancelled = await Booking.cancelReservation(reservationId);
 
         if (!cancelled) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Broneeringut ei leitud või see on juba tühistatud.' 
+            return res.status(404).json({
+                success: false,
+                message: 'Broneeringut ei leitud või see on juba tühistatud.'
             });
         }
 
-        return res.status(200).json({ 
-            success: true, 
-            message: 'Broneering edukalt tühistatud.', 
-            data: cancelled 
+        return res.status(200).json({
+            success: true,
+            message: 'Broneering edukalt tühistatud.',
+            data: cancelled
         });
 
     } catch (error) {

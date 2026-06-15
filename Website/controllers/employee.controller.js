@@ -84,11 +84,21 @@ const getSchedulePage = async (req, res, next) => {
         const locations = await locationModel.getAllLocations();
         const shifts = await workerShiftModel.getWorkerShifts(workerId);
 
+        const formattedShifts = shifts.map(shift => ({
+            ...shift,
+            start_time: typeof shift.start_time === "string"
+                ? shift.start_time
+                : shift.start_time.toLocaleString("sv-SE").replace(" ", "T").slice(0, 16),
+            end_time: typeof shift.end_time === "string"
+                ? shift.end_time
+                : shift.end_time.toLocaleString("sv-SE").replace(" ", "T").slice(0, 16)
+        }));
+
         res.render("employee/schedule", {
             title: "Töötaja kalendrivaade",
             pageClass: "employee-schedule-page",
             locations,
-            shifts
+            shifts: formattedShifts
         });
     } catch (err) {
         next(err);
@@ -191,15 +201,18 @@ const updateSchedule = async (req, res, next) => {
             return res.status(403).json({ message: "Saad muuta ainult enda tööaegu" });
         }
 
-        // Extract date from existing shift
-        const shiftDateStr = shift.start_time.toISOString
-            ? shift.start_time.toISOString().split('T')[0]
-            : shift.start_time.split(' ')[0];
+        const shiftDateStr = new Date(shift.start_time)
+            .toLocaleDateString("sv-SE");
 
         const startTimestamp = `${shiftDateStr} ${start_time}:00`;
         const endTimestamp = `${shiftDateStr} ${end_time}:00`;
 
-        await workerShiftModel.updateWorkerShift(shiftId, location_id, startTimestamp, endTimestamp);
+        await workerShiftModel.updateWorkerShift(
+            shiftId,
+            location_id,
+            startTimestamp,
+            endTimestamp
+        );
 
         res.json({ message: "Tööaeg uuendatud" });
     } catch (err) {
