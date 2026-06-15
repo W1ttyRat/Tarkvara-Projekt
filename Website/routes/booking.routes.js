@@ -5,6 +5,7 @@ const router = express.Router();
 
 router.get("/api/bookings", bookingController.getAllBookings);
 router.post("/api/bookings", bookingController.createBooking);
+router.post('/api/check-fit', bookingController.checkFit);
 router.patch("/api/bookings/:id/cancel", bookingController.cancelReservation);
 
 router.get("/booking", bookingController.getBookingPage);

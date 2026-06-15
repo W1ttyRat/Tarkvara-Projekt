@@ -58,13 +58,8 @@ class BookingModel {
     }
 
     async findVehicleByRegistration(registration_number) {
-        const query = `
-            SELECT id FROM vehicle
-            WHERE UPPER(TRIM(registration_number)) = UPPER(TRIM($1))
-            LIMIT 1
-        `;
-        const result = await this.pool.query(query, [registration_number]);
-        return result.rows[0] || null;
+        // return the vehicle row (id + dims) to allow callers to use dimensions if needed
+        return await this.getVehicleByRegistration(registration_number);
     }
 
     async cancelReservation(reservationId) {
@@ -76,6 +71,61 @@ class BookingModel {
         `;
         const result = await this.pool.query(query, [reservationId]);
         return result.rows[0];
+    }
+    // Helper: get vehicle by id
+    async getVehicleById(vehicleId) {
+        const res = await this.pool.query(
+            `SELECT id, width_mm, height_mm, length_mm FROM vehicle WHERE id = $1 LIMIT 1`,
+            [vehicleId]
+        );
+        return res.rows[0] || null;
+    }
+
+    // Helper: get vehicle by registration
+    async getVehicleByRegistration(registration_number) {
+        const res = await this.pool.query(
+            `SELECT id, width_mm, height_mm, length_mm FROM vehicle WHERE UPPER(TRIM(registration_number)) = UPPER(TRIM($1)) LIMIT 1`,
+            [registration_number]
+        );
+        return res.rows[0] || null;
+    }
+
+    // Helper: get location by id
+    async getLocationById(locationId) {
+        const res = await this.pool.query(
+            `SELECT id, door_width_mm, door_height_mm FROM location WHERE id = $1 LIMIT 1`,
+            [locationId]
+        );
+        return res.rows[0] || null;
+    }
+
+    // Consolidated fit check using vehicle and location objects
+    _evaluateFit(vehicle, location) {
+        if (!vehicle) return { fits: false, message: 'Sõidukit ei leitud.' };
+        if (!location) return { fits: false, message: 'Asukohta ei leitud.' };
+        if (vehicle.width_mm == null || vehicle.height_mm == null) return { fits: false, message: 'Sõiduki mõõtmed pole andmebaasis.' };
+
+        const fitsWidth = vehicle.width_mm <= location.door_width_mm;
+        const fitsHeight = vehicle.height_mm <= location.door_height_mm;
+        if (!fitsWidth || !fitsHeight) {
+            const reasons = [];
+            if (!fitsWidth) reasons.push('laius');
+            if (!fitsHeight) reasons.push('kõrgus');
+            return { fits: false, message: `Auto ei mahu: ${reasons.join(', ')}` };
+        }
+        return { fits: true, message: null };
+    }
+
+    async checkVehicleFit(vehicleId, locationId) {
+        const vehicle = await this.getVehicleById(vehicleId);
+        const location = await this.getLocationById(locationId);
+        return this._evaluateFit(vehicle, location);
+    }
+
+    async checkVehicleFitByRegistration(registration_number, locationId) {
+        const vehicle = await this.getVehicleByRegistration(registration_number);
+        const location = await this.getLocationById(locationId);
+        return this._evaluateFit(vehicle, location);
     }
 }
 
