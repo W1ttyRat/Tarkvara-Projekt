@@ -1,3 +1,4 @@
+const Booking = require("../models/booking.model");
 const locationModel = require("../models/location.model");
 const workerShiftModel = require("../models/workerShift.model");
 const workerModel = require("../models/worker.model");
@@ -16,12 +17,60 @@ const getWorkerIdForCurrentUser = async (userId) => {
 
 const getEmployeePage = async (req, res, next) => {
     try {
+        const workerId = await getWorkerIdForCurrentUser(req.user.id);
+        const today = new Date().toISOString().slice(0, 10);
+        const { city, address, category_id } = req.query;
+
+        const bookings = await Booking.getBookingsForDashboard({
+            date: today,
+            city: city || null,
+            address: address || null,
+            categoryId: category_id || null
+        });
+
+        const locations = await locationModel.getAllLocations();
+
+        // Build city -> addresses mapping from DB rows
+        const cityToAddresses = locations.reduce((acc, loc) => {
+            if (!loc.city || !loc.address) return acc;
+            if (!acc[loc.city]) acc[loc.city] = [];
+            if (!acc[loc.city].includes(loc.address)) acc[loc.city].push(loc.address);
+            return acc;
+        }, {});
+
+        const cities = [...new Set(locations.map(location => location.city))];
+
+        // Keep only valid city/address pair
+        let safeCity = city || "";
+        let safeAddress = address || "";
+
+        if (safeCity && safeAddress) {
+            const allowedAddresses = cityToAddresses[safeCity] || [];
+            if (!allowedAddresses.includes(safeAddress)) {
+                safeAddress = "";
+            }
+        }
+
+        // Addresses shown on initial render depend on selected city
+        const addresses = safeCity ? (cityToAddresses[safeCity] || []) : [];
+
+        const categories = await workerModel.getAllLicenceCategories();
+        const workerCategories = await workerModel.getWorkerCategories(workerId);
+
         res.render("employee/dashboard", {
             title: "Töötaja töölaud",
             pageClass: "employee-page",
-            bookings: [],
-            shifts: [],
-            categories: []
+            bookings: bookings || [],
+            categories: categories || [],
+            workerCategories: workerCategories || [],
+            cities,
+            addresses,
+            locations,
+            selectedFilters: {
+                city: safeCity,
+                address: safeAddress,
+                category_id: category_id || ""
+            }
         });
     } catch (err) {
         next(err);

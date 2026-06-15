@@ -1,12 +1,58 @@
-<h1>Töötaja töölaud</h1>
+<h1>Tootaja toolaud</h1>
+
+<form method="GET" action="/employee" class="mb-4">
+  <div class="row g-3">
+    <div class="col-md-4">
+      <label for="cityFilter" class="form-label">City</label>
+      <select id="cityFilter" name="city" class="form-select">
+        <option value="">All cities</option>
+        <% (cities || []).forEach(city => { %>
+          <option value="<%= city %>" <%= String((selectedFilters || {}).city || "") === String(city) ? "selected" : "" %>>
+            <%= city %>
+          </option>
+        <% }) %>
+      </select>
+    </div>
+
+    <div class="col-md-4">
+      <label for="addressFilter" class="form-label">Address</label>
+      <select id="addressFilter" name="address" class="form-select">
+        <option value="">All addresses</option>
+        <% (addresses || []).forEach(address => { %>
+          <option value="<%= address %>" <%= String((selectedFilters || {}).address || "") === String(address) ? "selected" : "" %>>
+            <%= address %>
+          </option>
+        <% }) %>
+      </select>
+    </div>
+
+    <div class="col-md-4">
+      <label for="categoryFilter" class="form-label">License category</label>
+      <select id="categoryFilter" name="category_id" class="form-select">
+        <option value="">All categories</option>
+        <% (categories || []).forEach(category => { %>
+          <option value="<%= category.id %>" <%= String((selectedFilters || {}).category_id || "") === String(category.id) ? "selected" : "" %>>
+            <%= category.name %>
+          </option>
+        <% }) %>
+      </select>
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-primary mt-3">Filter</button>
+</form>
 
 <section>
-  <h2>Tänased broneeringud</h2>
+  <h2>Tanased broneeringud</h2>
 
-  <% bookings.forEach(booking => { %>
+  <% if (!(bookings || []).length) { %>
+    <p>Broneeringuid ei leitud.</p>
+  <% } %>
+
+  <% (bookings || []).forEach(booking => { %>
     <div class="card mb-3 p-3">
       <strong><%= booking.time %></strong>
-      <p><%= booking.client %> — <%= booking.vehicle %></p>
+      <p><%= booking.client %> - <%= booking.vehicle %></p>
       <p><%= booking.service %></p>
       <span><%= booking.status %></span>
     </div>
@@ -14,21 +60,60 @@
 </section>
 
 <section>
-  <h2>Minu graafik</h2>
-
-  <% shifts.forEach(shift => { %>
-    <div class="card mb-3 p-3">
-      <p><%= shift.date %></p>
-      <p><%= shift.location %></p>
-      <p><%= shift.start %> - <%= shift.end %></p>
-    </div>
-  <% }) %>
-</section>
-
-<section>
   <h2>Minu kategooriad</h2>
 
-  <% categories.forEach(category => { %>
-    <span class="badge bg-primary"><%= category %></span>
+  <% if (!(workerCategories || []).length) { %>
+    <p>Kategooriaid ei leitud.</p>
+  <% } %>
+
+  <% (workerCategories || []).forEach(category => { %>
+    <span class="badge bg-primary"><%= category.name || category %></span>
   <% }) %>
 </section>
+
+<script>
+  (function () {
+    const citySelect = document.getElementById("cityFilter");
+    const addressSelect = document.getElementById("addressFilter");
+    if (!citySelect || !addressSelect) return;
+
+    const locations = <%- JSON.stringify(locations || []) %>;
+    const selectedAddress = "<%= (selectedFilters || {}).address || '' %>";
+
+    const cityToAddresses = locations.reduce((acc, loc) => {
+      if (!loc || !loc.city || !loc.address) return acc;
+      if (!acc[loc.city]) acc[loc.city] = [];
+      if (!acc[loc.city].includes(loc.address)) acc[loc.city].push(loc.address);
+      return acc;
+    }, {});
+
+    function renderAddresses(city, keepValue) {
+      const values = city ? (cityToAddresses[city] || []) : [];
+
+      addressSelect.innerHTML = "";
+      const firstOpt = document.createElement("option");
+      firstOpt.value = "";
+      firstOpt.textContent = city ? "All addresses" : "Select city first";
+      addressSelect.appendChild(firstOpt);
+
+      values.forEach((addr) => {
+        const opt = document.createElement("option");
+        opt.value = addr;
+        opt.textContent = addr;
+        if (keepValue && keepValue === addr) opt.selected = true;
+        addressSelect.appendChild(opt);
+      });
+
+      addressSelect.disabled = !city;
+      if (!values.includes(addressSelect.value)) {
+        addressSelect.value = "";
+      }
+    }
+
+    citySelect.addEventListener("change", function () {
+      renderAddresses(citySelect.value, "");
+    });
+
+    renderAddresses(citySelect.value, selectedAddress);
+  })();
+</script>
