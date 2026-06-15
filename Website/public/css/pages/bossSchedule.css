@@ -1,0 +1,102 @@
+.boss-schedule-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+}
+
+.boss-pending {
+    background: #f7df7e !important;
+}
+
+.boss-approved {
+    background: #a9d8b8 !important;
+}
+
+.boss-rejected {
+    background: #e8b5b5 !important;
+}
+
+.calendar-day small {
+    display: block;
+    margin-top: 20px;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #4a90e2;
+    color: white;
+    padding: 16px;
+    border-radius: 4px;
+}
+
+.calendar-header button {
+    border: 0;
+    background: white;
+    padding: 10px 14px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.calendar-legend {
+    display: flex;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.calendar-weekdays,
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar-weekdays div {
+    background: #eee;
+    padding: 14px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.calendar-day {
+    min-height: 86px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    background: #f4f4f4;
+    cursor: pointer;
+}
+
+.calendar-day.other-month {
+    background: #fafafa;
+    color: #aaa;
+    cursor: default;
+}
+
+.boss-schedule-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+}
+
+.schedule-sidebar {
+    background: #f7f7f7;
+    padding: 18px;
+    border-radius: 6px;
+}
+
+.boss-pending {
+    background: #f7df7e !important;
+}
+
+.boss-approved {
+    background: #a9d8b8 !important;
+}
+
+.boss-rejected {
+    background: #e8b5b5 !important;
+}
+
+.calendar-day small {
+    display: block;
+    margin-top: 20px;
+}

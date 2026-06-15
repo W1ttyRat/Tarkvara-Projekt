@@ -125,7 +125,13 @@ function createDay(day, otherMonth) {
 
   if (shift) {
 
-    dayEl.style.backgroundColor = "#ffd54f";
+    if (shift.status === "approved") {
+        dayEl.style.backgroundColor = "#a9d8b8";
+    } else if (shift.status === "rejected") {
+        dayEl.style.backgroundColor = "#cc6868";
+    } else {
+        dayEl.style.backgroundColor = "#ffd54f";
+    }
 
     const start =
         shift.start_time.substring(11, 16);
@@ -134,10 +140,11 @@ function createDay(day, otherMonth) {
         shift.end_time.substring(11, 16);
 
     dayEl.innerHTML += `
-        <small>
-            ${start}-${end}<br>
-            ${shift.address}
-        </small>
+      <small>
+          ${start}-${end}<br>
+          ${shift.address}<br>
+          ${shift.status}
+      </small>
     `;
   }
 

@@ -7,6 +7,7 @@ const getWorkerShifts = async (workerId) => {
             ws.id,
             ws.start_time,
             ws.end_time,
+            ws.status,
             l.city,
             l.address
         FROM worker_shift ws
