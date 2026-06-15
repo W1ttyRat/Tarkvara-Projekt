@@ -11,7 +11,7 @@ let selectedDates = [];
 let selectedStartTime = null;
 let selectedEndTime = null;
 
-const unavailableDays = [1, 11, 12, 13, 17, 25, 26, 29];
+const unavailableDays = [];
 
 const citySelect = document.getElementById("citySelect");
 const locationSelect = document.getElementById("locationSelect");
@@ -226,14 +226,47 @@ async function loadDaySchedule(dateKey) {
 
     list.innerHTML = "";
 
-    shifts.forEach(shift => {
-        const start = shift.start_time.slice(11, 16);
-        const end = shift.end_time.slice(11, 16);
+  shifts.forEach(shift => {
+    const li = document.createElement("li");
 
-        const li = document.createElement("li");
-        li.textContent = `${shift.start_time}-${shift.end_time} | ${shift.worker_name} | ${shift.location_city}, ${shift.location_address}`;
-        list.appendChild(li);
+    li.textContent = `${shift.start_time}-${shift.end_time} | ${shift.worker_name} | ${shift.location_city}, ${shift.location_address} `;
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "Kustuta";
+    deleteBtn.type = "button";
+
+    deleteBtn.addEventListener("click", async () => {
+        const confirmed = confirm("Kas oled kindel, et soovid selle tööaja kustutada?");
+
+        if (!confirmed) return;
+
+        try {
+            const response = await fetch(`/employee/schedule/${shift.id}`, {
+                method: "DELETE",
+                headers: {
+                    "CSRF-Token": window.csrfToken
+                }
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                alert(result.message || "Kustutamine ebaõnnestus");
+                return;
+            }
+
+            alert("Tööaeg kustutatud");
+            window.location.reload();
+
+        } catch (error) {
+            console.error(error);
+            alert("Kustutamine ebaõnnestus");
+        }
     });
+
+    li.appendChild(deleteBtn);
+    list.appendChild(li);
+  });
 }
 
 document.getElementById("prevMonth").addEventListener("click", () => {
@@ -273,23 +306,23 @@ confirmBtn.addEventListener("click", async () => {
 
     try {
         const response = await fetch("/employee/schedule", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-Token": window.csrfToken
-            },
-            body: JSON.stringify(data)
-        });
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+              "CSRF-Token": window.csrfToken
+          },
+          body: JSON.stringify(data)
+      });
 
-        if (!response.ok) {
-            throw new Error("Server error");
-        }
+      const result = await response.json();
 
-        const result = await response.json();
-        console.log(result);
+      if (!response.ok) {
+          alert(result.message || "Tööaja salvestamine ebaõnnestus");
+          return;
+      }
 
-        alert("Tööaeg salvestatud");
-        window.location.reload();
+      alert(result.message || "Tööaeg salvestatud");
+      window.location.reload();
     } catch (error) {
         console.error(error);
         alert("Tööaja salvestamine ebaõnnestus");

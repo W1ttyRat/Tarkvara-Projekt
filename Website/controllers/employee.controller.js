@@ -58,6 +58,15 @@ const createSchedule = async (req, res, next) => {
         const workerId = await getWorkerIdForCurrentUser(req.user.id);
 
         for (const date of dates) {
+            const alreadyHasShift =
+                await workerShiftModel.hasWorkerShiftOnDate(workerId, date);
+
+            if (alreadyHasShift) {
+                return res.status(400).json({
+                    message: `Sul on kuupäeval ${date} juba tööaeg olemas`
+                });
+            }
+
             const startTimestamp =
                 `${date} ${start_time}:00`;
 
@@ -95,9 +104,52 @@ const getScheduleForDay = async (req, res, next) => {
     }
 };
 
+const deleteSchedule = async (req, res, next) => {
+    try {
+        const workerId = 1; // hiljem tuleb sisseloginud kasutajast
+        const shiftId = req.params.id;
+
+        const shift = await workerShiftModel.getWorkerShiftById(shiftId);
+
+        if (!shift) {
+            return res.status(404).json({
+                message: "Tööaega ei leitud"
+            });
+        }
+
+        if (shift.worker_id !== workerId) {
+            return res.status(403).json({
+                message: "Saad kustutada ainult enda tööaegu"
+            });
+        }
+
+        const now = new Date();
+        const sevenDaysFromNow = new Date();
+        sevenDaysFromNow.setDate(now.getDate() + 7);
+
+        const shiftStart = new Date(shift.start_time);
+
+        if (shiftStart <= sevenDaysFromNow) {
+            return res.status(403).json({
+                message: "Alla 7 päeva enne tööpäeva ei saa tööaega kustutada"
+            });
+        }
+
+        await workerShiftModel.deleteWorkerShift(shiftId);
+
+        res.json({
+            message: "Tööaeg kustutatud"
+        });
+
+    } catch (err) {
+        next(err);
+    }
+};
+
 module.exports = {
     getEmployeePage,
     getSchedulePage,
     createSchedule,
-    getScheduleForDay
+    getScheduleForDay,
+    deleteSchedule
 };

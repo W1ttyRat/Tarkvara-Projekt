@@ -54,7 +54,7 @@
     </div>
 
     <div class="action-buttons">
-      <button id="clearBtn" type="button">Kustuta</button>
+      <button id="clearBtn" type="button">Tühjenda valik</button>
       <button id="confirmBtn" type="button" disabled>Kinnita</button>
     </div>
   </aside>
@@ -67,6 +67,9 @@
 <script>
   window.workerShifts =
       <%- JSON.stringify(shifts) %>;
+</script>
+<script>
+    window.csrfToken = "<%= csrfToken %>";
 </script>
 <script src="/js/adminSchedule.js" defer></script>
 <script>window.csrfToken = "<%= csrfToken %>";</script>
