@@ -1,4 +1,6 @@
 const Booking = require('../models/booking.model');
+const bookingService = require('../services/email.service');
+
 
 const getAllBookings = async (req, res) => {
     try {
@@ -97,6 +99,14 @@ const createBooking = async (req, res) => {
             start_time,
             end_time,
             comment
+        });
+
+        await bookingService.sendBookingConfirmation(req.body.email, {
+            name: req.body.client_name,
+            registration_number: req.body.registration_number,
+            location: req.body.location_name, 
+            service: req.body.service_name, 
+            start_time
         });
 
         return res.status(201).json({ 
