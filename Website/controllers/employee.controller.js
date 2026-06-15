@@ -1,11 +1,27 @@
 const locationModel = require("../models/location.model");
 const workerShiftModel = require("../models/workerShift.model");
+const workerModel = require("../models/worker.model");
+
+const getWorkerIdForCurrentUser = async (userId) => {
+    const worker = await workerModel.getWorkerByUserId(userId);
+
+    if (!worker) {
+        const err = new Error("Worker not found for current user");
+        err.statusCode = 404;
+        throw err;
+    }
+
+    return worker.id;
+}
 
 const getEmployeePage = async (req, res, next) => {
     try {
         res.render("employee/dashboard", {
             title: "Töötaja töölaud",
-            pageClass: "employee-page"
+            pageClass: "employee-page",
+            bookings: [],
+            shifts: [],
+            categories: []
         });
     } catch (err) {
         next(err);
@@ -14,7 +30,7 @@ const getEmployeePage = async (req, res, next) => {
 
 const getSchedulePage = async (req, res, next) => {
     try {
-        const workerId = 1;
+        const workerId = await getWorkerIdForCurrentUser(req.user.id);
 
         const locations = await locationModel.getAllLocations();
         const shifts = await workerShiftModel.getWorkerShifts(workerId);
@@ -39,7 +55,7 @@ const createSchedule = async (req, res, next) => {
             end_time
         } = req.body;
 
-        const workerId = 1; // hiljem tuleb sisseloginud kasutajast
+        const workerId = await getWorkerIdForCurrentUser(req.user.id);
 
         for (const date of dates) {
             const alreadyHasShift =
