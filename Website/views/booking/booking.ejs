@@ -1,8 +1,9 @@
 <h1>Broneeri ülevaatus</h1>
 
 <script nonce="<%= cspNonce %>">
-  window.locations = <% - JSON.stringify(locations || []) %>;
+  window.locations = <%- JSON.stringify(locations || []) %>;
 </script>
+<link rel="stylesheet" href="/css/pages/booking.css">
 <script src="/js/booking.js" defer></script>
 
 <form method="POST" action="/booking" class="booking-form">
@@ -36,8 +37,38 @@
   </select>
 
   <div id="fit-msg" style="color: #b00020; margin: 8px 0; font-weight: 500;"></div>
+  <div id="availability-msg" style="color: #b00020; margin: 8px 0; font-weight: 500;"></div>
 
-  <input type="datetime-local" id="start_time" name="start_time" required>
+  <div class="booking-calendar-wrap">
+    <label>Vali kuupaev ja aeg</label>
+
+    <div class="calendar-header">
+      <button id="prevMonth" type="button">&lt;</button>
+      <h3 id="monthTitle"></h3>
+      <button id="nextMonth" type="button">&gt;</button>
+    </div>
+
+    <div class="calendar-weekdays">
+      <div>E</div>
+      <div>T</div>
+      <div>K</div>
+      <div>N</div>
+      <div>R</div>
+      <div>L</div>
+      <div>P</div>
+    </div>
+
+    <div id="calendarGrid" class="calendar-grid"></div>
+
+    <div class="time-picker">
+      <p>Vali kellaaeg:</p>
+      <div id="timeButtons" class="time-buttons"></div>
+    </div>
+
+    <p id="selectedDateTime" class="selected-date-time">Valik puudub</p>
+  </div>
+
+  <input type="hidden" id="start_time" name="start_time" required>
 
   <input id="client_name" name="client_name" placeholder="Nimi" required>
   <input id="phone" name="phone" placeholder="Telefon" required>

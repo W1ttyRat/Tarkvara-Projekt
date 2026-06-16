@@ -1,8 +1,43 @@
 const Booking = require('../models/booking.model');
 const emailService = require('../services/email.service');
-
 const serviceModel = require('../models/service.model');
 const locationModel = require('../models/location.model');
+
+const BOOKING_DURATION_MINUTES = 45;
+
+const addMinutesToDateTimeLocal = (value, minutes) => {
+    const [datePart, timePart] = value.split('T');
+    const [year, month, day] = datePart.split('-').map(Number);
+    const [hour, minute] = timePart.split(':').map(Number);
+
+    const date = new Date(year, month - 1, day, hour, minute, 0, 0);
+    date.setMinutes(date.getMinutes() + minutes);
+
+    const pad = (n) => String(n).padStart(2, '0');
+
+    return [
+        date.getFullYear(),
+        pad(date.getMonth() + 1),
+        pad(date.getDate())
+    ].join('-') + 'T' + [
+        pad(date.getHours()),
+        pad(date.getMinutes())
+    ].join(':');
+};
+
+const getSlotWindow = (rawStartTime) => {
+    if (!rawStartTime || typeof rawStartTime !== 'string') {
+        return null;
+    }
+
+    const startValue = rawStartTime.trim();
+    if (!startValue) {
+        return null;
+    }
+
+    const endValue = addMinutesToDateTimeLocal(startValue, BOOKING_DURATION_MINUTES);
+    return { startValue, endValue };
+};
 
 const getAllBookings = async (req, res, next) => {
     try {
@@ -13,25 +48,22 @@ const getAllBookings = async (req, res, next) => {
     }
 };
 
-// DB access delegated to models/Booking
-
 const createBooking = async (req, res, next) => {
     try {
         let client_id = parseInt(req.body.client_id, 10);
-
-        const registration_number_raw = req.body.registration_number || '';
-        const registration_number = registration_number_raw.trim();
-        console.log(
-            'createBooking registration_number:',
-            JSON.stringify(registration_number_raw),
-            '->',
-            JSON.stringify(registration_number)
-        );
-
         let vehicle_id = parseInt(req.body.vehicle_id, 10);
+        const location_id = parseInt(req.body.location_id, 10);
+        const service_id = parseInt(req.body.service_id, 10);
+        const registration_number = (req.body.registration_number || '').trim();
+        const { start_time, comment } = req.body;
+        
+        // Vehicle handling
         if (isNaN(vehicle_id)) {
             if (!registration_number) {
-                return res.status(400).json({ success: false, message: 'Sõiduki registreerimisnumber puudub.' });
+                return res.status(400).json({
+                     success: false, 
+                     message: 'Sõiduki registreerimisnumber puudub.' 
+                });
             }
 
             const found = await Booking.findVehicleByRegistration(registration_number);
@@ -45,10 +77,7 @@ const createBooking = async (req, res, next) => {
             vehicle_id = found.id;
         }
 
-        const location_id = parseInt(req.body.location_id, 10);
-        const service_id = parseInt(req.body.service_id, 10);
-        const { start_time, comment } = req.body;
-
+        // Client handling
         if (isNaN(client_id)) {
             const client_name = req.body.client_name;
             const phone = req.body.phone;
@@ -62,43 +91,28 @@ const createBooking = async (req, res, next) => {
             client_id = client.id;
         }
 
-        if (isNaN(client_id) || isNaN(vehicle_id) || isNaN(service_id) || isNaN(location_id)) {
+        // Validate all IDs are numbers
+        if ([client_id, vehicle_id, service_id, location_id].some(isNaN)) {
             return res.status(400).json({
                 success: false,
                 message: 'Vigased andmed. Kõik ID-väärtused peavad olema numbrid!'
             });
         }
 
-        if (!start_time || typeof start_time !== 'string') {
-            return res.status(400).json({ success: false, message: 'Palun lisa alguskuupäev.' });
+        // Validate start_time
+        if (!start_time || typeof start_time !== 'string' || !start_time.trim()) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Palun lisa alguskuupäev.' 
+            });
         }
 
-        const startValue = start_time.trim();
-        if (!startValue) {
+        const slotWindow = getSlotWindow(start_time);
+        if (!slotWindow) {
             return res.status(400).json({ success: false, message: 'Kuupäeva formaat on vigane.' });
         }
 
-        const addMinutesToDateTimeLocal = (value, minutes) => {
-            const [datePart, timePart] = value.split('T');
-            const [year, month, day] = datePart.split('-').map(Number);
-            const [hour, minute] = timePart.split(':').map(Number);
-
-            const date = new Date(year, month - 1, day, hour, minute, 0, 0);
-            date.setMinutes(date.getMinutes() + minutes);
-
-            const pad = (n) => String(n).padStart(2, '0');
-
-            return [
-                date.getFullYear(),
-                pad(date.getMonth() + 1),
-                pad(date.getDate())
-            ].join('-') + 'T' + [
-                pad(date.getHours()),
-                pad(date.getMinutes())
-            ].join(':');
-        };
-
-        const endValue = addMinutesToDateTimeLocal(startValue, 45);
+        const { startValue, endValue } = slotWindow;
 
         try {
             const fitResult = await Booking.checkVehicleFit(vehicle_id, location_id);
@@ -110,15 +124,19 @@ const createBooking = async (req, res, next) => {
             return res.status(500).json({ success: false, message: 'Serveri viga mõõtude kontrollimisel' });
         }
 
-        const overlaps = await Booking.checkOverlap(startValue, endValue);
+        const availability = await Booking.getStaffingAvailability({
+            locationId: location_id,
+            serviceId: service_id,
+            startTime: startValue,
+            endTime: endValue
+        });
 
-        if (overlaps.length > 0) {
+        if (!availability.available) {
             return res.status(400).json({
                 success: false,
-                message: 'See töötaja on valitud ajavahemikus juba hõivatud!'
+                message: availability.message || 'Valitud aeg ei ole saadaval.'
             });
         }
-
         const created = await Booking.createReservation({
             client_id,
             vehicle_id,
@@ -129,13 +147,16 @@ const createBooking = async (req, res, next) => {
             comment
         });
 
-        await emailService.sendBookingConfirmation(req.body.email, {
-            name: req.body.client_name,
-            registration_number: req.body.registration_number,
-            location: req.body.location_name, 
-            service: req.body.service_name, 
-            start_time
-        });
+        // Send confirmation email
+        if (req.body.email) {
+            await emailService.sendBookingConfirmation(req.body.email, {
+                name: req.body.client_name,
+                registration_number: req.body.registration_number,
+                location: req.body.location_name,
+                service: req.body.service_name,
+                start_time
+            }).catch(err => console.error('Email sending failed:', err));
+        }
 
         return res.status(201).json({
             success: true,
@@ -146,6 +167,7 @@ const createBooking = async (req, res, next) => {
         return next(error);
     }
 };
+
 
 const cancelReservation = async (req, res, next) => {
     try {
@@ -201,6 +223,39 @@ const checkFit = async (req, res, next) => {
     }
 };
 
+// POST /api/check-availability
+// body: { locationId: number, serviceId: number, start_time: string }
+const checkAvailability = async (req, res, next) => {
+    try {
+        const locationId = parseInt(req.body.locationId, 10);
+        const serviceId = parseInt(req.body.serviceId, 10);
+        const slotWindow = getSlotWindow(req.body.start_time);
+
+        if (isNaN(locationId)) {
+            return res.status(400).json({ available: false, message: 'Vali asukoht.' });
+        }
+
+        if (isNaN(serviceId)) {
+            return res.status(400).json({ available: false, message: 'Vali teenus.' });
+        }
+
+        if (!slotWindow) {
+            return res.status(400).json({ available: false, message: 'Vali korrektne algusaeg.' });
+        }
+
+        const availability = await Booking.getStaffingAvailability({
+            locationId,
+            serviceId,
+            startTime: slotWindow.startValue,
+            endTime: slotWindow.endValue
+        });
+
+        return res.json(availability);
+    } catch (err) {
+        return next(err);
+    }
+};
+
 const getBookingPage = async (req, res, next) => {
     try {
         const service = await serviceModel.getAllServices();
@@ -223,5 +278,6 @@ module.exports = {
     createBooking,
     cancelReservation,
     getBookingPage,
-    checkFit
+    checkFit,
+    checkAvailability
 };
