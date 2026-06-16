@@ -1,11 +1,11 @@
-<h1>Tootaja toolaud</h1>
+<h1>Töölaud</h1>
 
 <form method="GET" action="/employee" class="mb-4">
   <div class="row g-3">
     <div class="col-md-4">
-      <label for="cityFilter" class="form-label">City</label>
+      <label for="cityFilter" class="form-label">Linn</label>
       <select id="cityFilter" name="city" class="form-select">
-        <option value="">All cities</option>
+        <option value="">Kõik linnad</option>
         <% (cities || []).forEach(city=> { %>
           <option value="<%= city %>" <%=String((selectedFilters || {}).city || "" )===String(city) ? "selected" : "" %>
             >
@@ -16,9 +16,9 @@
     </div>
 
     <div class="col-md-4">
-      <label for="addressFilter" class="form-label">Address</label>
+      <label for="addressFilter" class="form-label">Aadress</label>
       <select id="addressFilter" name="address" class="form-select">
-        <option value="">All addresses</option>
+        <option value="">Kõik aadressid</option>
         <% (addresses || []).forEach(address=> { %>
           <option value="<%= address %>" <%=String((selectedFilters || {}).address || "" )===String(address)
             ? "selected" : "" %>>
@@ -29,9 +29,9 @@
     </div>
 
     <div class="col-md-4">
-      <label for="categoryFilter" class="form-label">License category</label>
+      <label for="categoryFilter" class="form-label">Juhiloa kategooria</label>
       <select id="categoryFilter" name="category_id" class="form-select">
-        <option value="">All categories</option>
+        <option value="">Kõik kategooriad</option>
         <% (categories || []).forEach(category=> { %>
           <option value="<%= category.id %>" <%=String((selectedFilters || {}).category_id || "" )===String(category.id)
             ? "selected" : "" %>>
@@ -42,11 +42,11 @@
     </div>
   </div>
 
-  <button type="submit" class="btn btn-primary mt-3">Filter</button>
+  <button type="submit" class="btn btn-primary mt-3">Filtreeri</button>
 </form>
 
 <section>
-  <h2>Tanased broneeringud</h2>
+  <h2>Tänased broneeringud</h2>
 
   <% if (!(bookings || []).length) { %>
     <p>Broneeringuid ei leitud.</p>
@@ -109,7 +109,7 @@
       addressSelect.innerHTML = "";
       const firstOpt = document.createElement("option");
       firstOpt.value = "";
-      firstOpt.textContent = city ? "All addresses" : "Select city first";
+      firstOpt.textContent = city ? "Kõik aadressid" : "Vali kõigepealt linn";
       addressSelect.appendChild(firstOpt);
 
       values.forEach((addr) => {

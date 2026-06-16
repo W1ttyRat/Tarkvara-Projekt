@@ -197,6 +197,13 @@
     height: 18px;
     display: inline-block;
     border-radius: 4px;
+.calendar-legend b {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    margin-right: 8px;
+    vertical-align: middle;
 }
 
 .legend-pending {

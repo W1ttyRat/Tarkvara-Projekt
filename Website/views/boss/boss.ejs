@@ -1,11 +1,11 @@
 <div class="container py-5">
     <div class="row">
         <div class="col-12">
-            <h1 class="mb-4">Boss Dashboard</h1>
+            <h1 class="mb-4">Töölaud</h1>
 
-            <% if (typeof user !== "undefined" && user) { %>
+            <% if (typeof bossName !== "undefined" && bossName) { %>
                 <p class="text-muted">
-                    Tere, <%= user.first_name %>!
+                    Tere, <%= bossName %>!
                 </p>
             <% } %>
         </div>
