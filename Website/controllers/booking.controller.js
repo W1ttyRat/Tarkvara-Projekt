@@ -1,6 +1,5 @@
 const Booking = require('../models/booking.model');
 const emailService = require('../services/email.service');
-
 const serviceModel = require('../models/service.model');
 const locationModel = require('../models/location.model');
 
@@ -13,25 +12,22 @@ const getAllBookings = async (req, res, next) => {
     }
 };
 
-// DB access delegated to models/Booking
-
 const createBooking = async (req, res, next) => {
     try {
         let client_id = parseInt(req.body.client_id, 10);
-
-        const registration_number_raw = req.body.registration_number || '';
-        const registration_number = registration_number_raw.trim();
-        console.log(
-            'createBooking registration_number:',
-            JSON.stringify(registration_number_raw),
-            '->',
-            JSON.stringify(registration_number)
-        );
-
         let vehicle_id = parseInt(req.body.vehicle_id, 10);
+        const location_id = parseInt(req.body.location_id, 10);
+        const service_id = parseInt(req.body.service_id, 10);
+        const registration_number = (req.body.registration_number || '').trim();
+        const { start_time, comment } = req.body;
+        
+        // Vehicle handling
         if (isNaN(vehicle_id)) {
             if (!registration_number) {
-                return res.status(400).json({ success: false, message: 'Sõiduki registreerimisnumber puudub.' });
+                return res.status(400).json({
+                     success: false, 
+                     message: 'Sõiduki registreerimisnumber puudub.' 
+                });
             }
 
             const found = await Booking.findVehicleByRegistration(registration_number);
@@ -45,10 +41,7 @@ const createBooking = async (req, res, next) => {
             vehicle_id = found.id;
         }
 
-        const location_id = parseInt(req.body.location_id, 10);
-        const service_id = parseInt(req.body.service_id, 10);
-        const { start_time, comment } = req.body;
-
+        // Client handling
         if (isNaN(client_id)) {
             const client_name = req.body.client_name;
             const phone = req.body.phone;
@@ -62,23 +55,86 @@ const createBooking = async (req, res, next) => {
             client_id = client.id;
         }
 
-        if (isNaN(client_id) || isNaN(vehicle_id) || isNaN(service_id) || isNaN(location_id)) {
+        // Validate all IDs are numbers
+        if ([client_id, vehicle_id, service_id, location_id].some(isNaN)) {
             return res.status(400).json({
                 success: false,
                 message: 'Vigased andmed. Kõik ID-väärtused peavad olema numbrid!'
             });
         }
 
-        if (!start_time || typeof start_time !== 'string') {
-            return res.status(400).json({ success: false, message: 'Palun lisa alguskuupäev.' });
+        // Validate start_time
+        if (!start_time || typeof start_time !== 'string' || !start_time.trim()) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Palun lisa alguskuupäev.' 
+            });
         }
 
         const startValue = start_time.trim();
-        if (!startValue) {
-            return res.status(400).json({ success: false, message: 'Kuupäeva formaat on vigane.' });
+        const endValue = addMinutesToDateTimeLocal(startValue, 45);
+        
+        // Run parallel validations for vehicle fit and overlap
+        try {
+            const [fitResult, overlaps] = await Promise.all([
+                Booking.checkVehicleFit(vehicle_id, location_id),
+                Booking.checkOverlap(startValue, endValue)
+            ]);
+
+            if (!fitResult.fits) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Sõiduk ei mahu valitud asukohta.'
+                });
+            }
+
+            if (overlaps.length > 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'See töötaja on valitud ajavahemikus juba hõivatud!'
+                });
+                        }
+        } catch (err) {
+            console.error('server-side validation error', err);
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Serveri viga broneeringu kontrollimisel' 
+            });
         }
 
-        const addMinutesToDateTimeLocal = (value, minutes) => {
+        // Create reservation
+        const created = await Booking.createReservation({
+            client_id,
+            vehicle_id,
+            location_id,
+            service_id,
+            start_time: startValue,
+            end_time: endValue,
+            comment
+        });
+
+        // Send confirmation email
+        if (req.body.email) {
+            emailService.sendBookingConfirmation(req.body.email, {
+                name: req.body.client_name,
+                registration_number: req.body.registration_number,
+                location: req.body.location_name,
+                service: req.body.service_name,
+                start_time
+            }).catch(err => console.error('Email sending failed:', err));
+        }
+
+        return res.status(201).json({
+            success: true,
+            message: 'Broneering edukalt loodud!',
+            data: created
+        });
+    } catch (error) {
+        return next(error);
+    }
+};
+
+const addMinutesToDateTimeLocal = (value, minutes) => {
             const [datePart, timePart] = value.split('T');
             const [year, month, day] = datePart.split('-').map(Number);
             const [hour, minute] = timePart.split(':').map(Number);
@@ -97,55 +153,6 @@ const createBooking = async (req, res, next) => {
                 pad(date.getMinutes())
             ].join(':');
         };
-
-        const endValue = addMinutesToDateTimeLocal(startValue, 45);
-
-        try {
-            const fitResult = await Booking.checkVehicleFit(vehicle_id, location_id);
-            if (!fitResult.fits) {
-                return res.status(400).json({ success: false, message: fitResult.message });
-            }
-        } catch (err) {
-            console.error('server-side fit check error', err);
-            return res.status(500).json({ success: false, message: 'Serveri viga mõõtude kontrollimisel' });
-        }
-
-        const overlaps = await Booking.checkOverlap(startValue, endValue);
-
-        if (overlaps.length > 0) {
-            return res.status(400).json({
-                success: false,
-                message: 'See töötaja on valitud ajavahemikus juba hõivatud!'
-            });
-        }
-
-        const created = await Booking.createReservation({
-            client_id,
-            vehicle_id,
-            location_id,
-            service_id,
-            start_time: startValue,
-            end_time: endValue,
-            comment
-        });
-
-        await emailService.sendBookingConfirmation(req.body.email, {
-            name: req.body.client_name,
-            registration_number: req.body.registration_number,
-            location: req.body.location_name, 
-            service: req.body.service_name, 
-            start_time
-        });
-
-        return res.status(201).json({
-            success: true,
-            message: 'Broneering edukalt loodud!',
-            data: created
-        });
-    } catch (error) {
-        return next(error);
-    }
-};
 
 const cancelReservation = async (req, res, next) => {
     try {
