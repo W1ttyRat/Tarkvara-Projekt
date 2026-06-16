@@ -1,0 +1,118 @@
+.booking-calendar-wrap {
+  background: #f7f9fc;
+  border: 1px solid #d8e0ea;
+  border-radius: 8px;
+  padding: 14px;
+  margin: 10px 0 14px;
+}
+
+.booking-calendar-wrap label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #2f6cab;
+  color: #ffffff;
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.calendar-header h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.calendar-header button {
+  border: 0;
+  background: #ffffff;
+  color: #1f4e7d;
+  border-radius: 4px;
+  font-weight: 700;
+  padding: 6px 10px;
+}
+
+.calendar-weekdays,
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.calendar-weekdays div {
+  text-align: center;
+  font-weight: 700;
+  color: #4f5d6a;
+  font-size: 0.9rem;
+}
+
+.calendar-day {
+  border: 1px solid #cfd8e3;
+  border-radius: 6px;
+  background: #ffffff;
+  min-height: 44px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.calendar-day.other-month {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.calendar-day.past-day {
+  background: #f0f1f3;
+  color: #8a919b;
+  cursor: not-allowed;
+}
+
+.calendar-day.selected {
+  background: #2f6cab;
+  color: #ffffff;
+  border-color: #2f6cab;
+}
+
+.time-picker {
+  margin-top: 12px;
+}
+
+.time-picker p {
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+
+.time-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.time-buttons button {
+  border: 1px solid #bfd0e2;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 6px 12px;
+}
+
+.time-buttons button.active {
+  background: #2f6cab;
+  color: #ffffff;
+  border-color: #2f6cab;
+}
+
+.selected-date-time {
+  margin: 10px 0 0;
+  font-weight: 600;
+  color: #2d3b48;
+}
+
+@media (max-width: 640px) {
+  .calendar-day {
+    min-height: 38px;
+  }
+}
