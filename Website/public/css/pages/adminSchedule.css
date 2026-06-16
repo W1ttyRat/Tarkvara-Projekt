@@ -37,9 +37,13 @@
   vertical-align: middle;
 }
 
-.legend-available { background: #a9d8b8; }
+.legend-available { background: #bfe3c9; }
 .legend-selected { background: #4a90e2; }
-.legend-unavailable { background: #e8b5b5; }
+.legend-unavailable { background: #efc1c1; }
+
+.legend-pending { background: #ffd54f; }
+.legend-approved { background: #8fd19e; }
+.legend-rejected { background: #cc6868; }
 
 .calendar-weekdays,
 .calendar-grid {
@@ -58,7 +62,7 @@
   min-height: 86px;
   padding: 10px;
   border: 1px solid #ddd;
-  background: #a9d8b8;
+  background: #bfe3c9;
   cursor: pointer;
   font-weight: bold;
 }
@@ -143,4 +147,101 @@
 
 #confirmBtn:disabled {
   background: #ccc;
+}
+
+.employee-schedule-page {
+  background: #f6f8fb;
+}
+
+.employee-schedule-page h1 {
+  margin-bottom: 18px;
+  font-weight: 700;
+}
+
+.calendar-section,
+.schedule-sidebar {
+  background: white;
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+}
+
+.calendar-header {
+  border-radius: 12px;
+}
+
+.calendar-day {
+  min-height: 105px;
+  transition: 0.15s;
+}
+
+.calendar-day:hover:not(.other-month):not(.unavailable) {
+  transform: translateY(-2px);
+  box-shadow: inset 0 0 0 2px #4a90e2;
+}
+
+.calendar-day span {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.calendar-day small {
+  line-height: 1.45;
+}
+
+.calendar-legend {
+  background: white;
+  padding: 12px 14px;
+  border-radius: 10px;
+  flex-wrap: wrap;
+}
+
+.schedule-sidebar label {
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.schedule-sidebar select {
+  border: 1px solid #d5dbe3;
+  border-radius: 8px;
+}
+
+.time-buttons button {
+  transition: 0.15s;
+}
+
+.time-buttons button:hover {
+  background: #eef5ff;
+}
+
+.selected-box {
+  border-radius: 10px;
+}
+
+#daySchedule li {
+  margin-bottom: 10px;
+}
+
+.edit-shift-btn {
+  margin-left: 8px;
+  border: none;
+  border-radius: 6px;
+  background: #4a90e2;
+  color: white;
+  padding: 4px 8px;
+}
+
+.delete-shift-btn {
+  margin-left: 8px;
+  border: none;
+  border-radius: 6px;
+  background: #dc3545;
+  color: white;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.action-buttons button {
+  border-radius: 8px;
+  font-weight: 600;
 }
