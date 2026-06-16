@@ -38,7 +38,7 @@ const getEmployeePage = async (req, res, next) => {
             return acc;
         }, {});
 
-        const cities = [...new Set(locations.map(location => location.city))];
+        const cities = Object.keys(cityToAddresses);
 
         // Keep only valid city/address pair
         let safeCity = city || "";
@@ -177,7 +177,7 @@ const deleteSchedule = async (req, res, next) => {
         const workerId = await getWorkerIdForCurrentUser(req.user.id);
         const shiftId = req.params.id;
 
-        if (!Number.isInteger(shiftId)) {
+        if (isNaN(Number(shiftId))) {
             return res.status(400).json({ message: "Vigane tööaja ID" });
         }
 
