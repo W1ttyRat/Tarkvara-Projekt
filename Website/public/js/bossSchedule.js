@@ -50,8 +50,11 @@ function renderBossCalendar() {
         createBossDay(day, false);
     }
 
+    let nextMonthDay = 1;
+
     while (bossCalendarGrid.children.length % 7 !== 0) {
-        createBossDay(bossCalendarGrid.children.length, true);
+        createBossDay(nextMonthDay, true);
+        nextMonthDay++;
     }
 }
 

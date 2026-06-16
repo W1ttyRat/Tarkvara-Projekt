@@ -11,6 +11,15 @@ router.get('/', bossController.getBossPage);
 router.get('/register-employee', bossController.getRegisterEmployeePage);
 router.get("/schedule", bossController.getBossSchedulePage);
 router.get("/employees", bossController.getEmployeesPage);
+router.get(
+    "/employees/:id/edit",
+    bossController.getEditEmployeePage
+);
+
+router.post(
+    "/employees/:id/edit",
+    bossController.updateEmployee
+);
 router.post('/register-employee', bossController.registerEmployee);
 
 router.patch(

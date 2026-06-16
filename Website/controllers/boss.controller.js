@@ -144,6 +144,85 @@ const getEmployeesPage = async (req, res, next) => {
     }
 };
 
+const getEditEmployeePage = async (req, res, next) => {
+    try {
+        const userId = req.params.id;
+
+        const employee = await User.getEmployeeForEdit(userId);
+
+        if (!employee) {
+            return res.status(404).send("Töötajat ei leitud");
+        }
+
+        const licenceCategories = await User.getAllLicenceCategories();
+
+        const selectedLicenceIds =
+            employee.worker_id
+                ? await User.getWorkerLicenceCategoryIds(employee.worker_id)
+                : [];
+
+        res.render("boss/edit-employee", {
+            title: "Muuda töötajat",
+            pageClass: "edit-employee-page",
+            employee,
+            licenceCategories,
+            selectedLicenceIds
+        });
+
+    } catch (err) {
+        next(err);
+    }
+};
+
+const updateEmployee = async (req, res, next) => {
+    try {
+        const userId = req.params.id;
+
+        const {
+            first_name,
+            last_name,
+            username,
+            name,
+            email,
+            phone
+        } = req.body;
+
+        let licence_category_ids = req.body.licence_category_ids || [];
+
+        if (!Array.isArray(licence_category_ids)) {
+            licence_category_ids = [licence_category_ids];
+        }
+
+        const employee = await User.getEmployeeForEdit(userId);
+
+        if (!employee) {
+            return res.status(404).send("Töötajat ei leitud");
+        }
+
+        await User.updateEmployee(
+            userId,
+            first_name,
+            last_name,
+            username,
+            name,
+            email,
+            phone
+        );
+
+        if (employee.worker_id) {
+            await User.updateWorkerLicenceCategories(
+                employee.worker_id,
+                licence_category_ids
+            );
+        }
+
+        res.redirect("/boss/employees");
+
+    } catch (err) {
+        next(err);
+    }
+};
+
 module.exports = {
     getBossPage,
     getRegisterEmployeePage,
@@ -151,5 +230,7 @@ module.exports = {
     getBossSchedulePage,
     updateShiftStatus,
     updateShift,
-    getEmployeesPage
+    getEmployeesPage,
+    getEditEmployeePage,
+    updateEmployee
 };
