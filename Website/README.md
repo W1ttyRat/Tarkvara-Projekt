@@ -1,4 +1,4 @@
-# Tarkvara-Projekt — Website
+# Tarkvara-Projekt - Website
 
 > Professional web application for booking vehicle inspections and managing staff schedules.
 
