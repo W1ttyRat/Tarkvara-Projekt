@@ -1,16 +1,16 @@
 <header>
   <nav class="navbar navbar-expand-sm navbar-light bg-light">
     <div class="container">
-      <a class="navbar-brand" href="/booking">Booking</a>
+      <a class="navbar-brand" href="/">A-Ülevaatus</a>
 
       <div class="collapse navbar-collapse">
         <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" href="/booking">Booking</a></li>
           <% if (user) { %>
             <% if (user.role === 'boss') { %>
               <li class="nav-item"><a class="nav-link" href="/boss">Boss Dashboard</a></li>
-              <li class="nav-item"><a class="nav-link" href="/admin">Admin</a></li>
+              <li class="nav-item"><a class="nav-link disabled" href="/admin">Admin</a></li>
               <li class="nav-item"><a class="nav-link" href="/employee">Employee Dashboard</a></li>
-              <li class="nav-item"><a class="nav-link" href="/employee/schedule">Employee Schedule</a></li>
             <% } else if (user.role === 'employee') { %>
               <li class="nav-item"><a class="nav-link" href="/employee">Employee Dashboard</a></li>
               <li class="nav-item"><a class="nav-link" href="/employee/schedule">My Schedule</a></li>
