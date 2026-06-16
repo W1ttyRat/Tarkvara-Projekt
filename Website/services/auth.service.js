@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const RefreshToken = require('../models/RefreshToken.model');
 const { token } = require('morgan');
+const emailService = require('./email.service');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const ACCESS_TOKEN_EXPIRES_IN = process.env.ACCESS_TOKEN_EXPIRES_IN || '15m';
@@ -40,9 +41,29 @@ class AuthService {
         );
     }
 
-    async registerUser({ first_name, last_name, username, password, confirm_password, role }) {
-        if (!first_name || !last_name || !username || !password || !confirm_password || !role) {
-            const err = new Error('All fields are required');
+    async registerUser({ first_name, last_name, username, email, phone, password, confirm_password, role, licence_category_ids = [] }) {
+        if (!first_name || !last_name || !username || !role) {
+            const err = new Error('All required fields must be filled');
+            err.statusCode = 400;
+            throw err;
+        }
+
+        if (role === 'employee' && !email) {
+            const err = new Error('Employee email is required');
+            err.statusCode = 400;
+            throw err;
+        }
+
+        let tempPassword = null;
+        if (!password && !confirm_password) {
+            tempPassword = crypto.randomBytes(8).toString('base64').slice(0, 12);
+            console.log(`Generated temporary password for ${username}: ${tempPassword}`);
+            password = tempPassword;
+            confirm_password = tempPassword;
+        }
+
+        if (!password || !confirm_password) {
+            const err = new Error('Password and confirm password are required unless a temporary password is generated');
             err.statusCode = 400;
             throw err;
         }
@@ -81,13 +102,27 @@ class AuthService {
         const passwordHash = await bcrypt.hash(password, 10);
         const user = await User.createUser(first_name, last_name, username, passwordHash, role);
 
+        let worker = null;
         if (role === 'employee') {
-            await Worker.createWorker({
+            worker = await Worker.createWorker({
                 name: `${first_name} ${last_name}`,
-                email: null,
-                phone: null,
+                email,
+                phone,
                 user_id: user.id
             });
+        }
+
+        if (Array.isArray(licence_category_ids) && licence_category_ids.length && worker) {
+            await User.updateWorkerLicenceCategories(worker.id, licence_category_ids);
+        }
+
+        if (tempPassword) {
+            await User.setMustChangePassword(user.id, true);
+            if (email) {
+                console.log(`Sending temporary password to ${email}`);
+                await emailService.sendTemporaryPassword(email, tempPassword);
+                console.log(`Temporary password sent to ${email}`);
+            }
         }
         return user;
     }
@@ -149,7 +184,8 @@ class AuthService {
                 first_name: user.first_name,
                 last_name: user.last_name,
                 username: user.username,
-                role: user.role
+                role: user.role,
+                must_change_password: user.must_change_password
             },
             accessToken,
             refreshToken

@@ -19,9 +19,13 @@ const getBossPage = async (req, res, next) => {
 
 const getRegisterEmployeePage = async (req, res, next) => {
     try {
+        const licenceCategories = await User.getAllLicenceCategories();
+
         res.render('boss/register-employee', {
             title: 'Register Employee',
             pageClass: 'register-employee-page',
+            licenceCategories,
+            selectedLicenceIds: []
         });
     } catch (err) {
         next(err);
@@ -30,18 +34,28 @@ const getRegisterEmployeePage = async (req, res, next) => {
 
 const registerEmployee = async (req, res, next) => {
     try {
+        let { licence_category_ids = [] } = req.body;
+
+        if (!Array.isArray(licence_category_ids)) {
+            licence_category_ids = licence_category_ids ? [licence_category_ids] : [];
+        }
+
         await authService.registerUser({
             ...req.body,
-            role: 'employee'
+            role: 'employee',
+            licence_category_ids
         });
 
         res.redirect('/boss');
     } catch (err) {
         if (err.statusCode && err.statusCode >= 400 && err.statusCode < 500) {
+            const licenceCategories = await User.getAllLicenceCategories();
             return res.status(err.statusCode).render('boss/register-employee', {
                 title: 'Register Employee',
                 pageClass: 'register-employee-page',
                 errorMessage: err.message,
+                licenceCategories,
+                selectedLicenceIds: req.body.licence_category_ids || []
             });
         }
         next(err);
@@ -139,7 +153,9 @@ const getEmployeesPage = async (req, res, next) => {
         res.render("boss/employees", {
             title: "Töötajad",
             pageClass: "employees-page",
-            employees
+            employees,
+            csrfToken: req.csrfToken(),
+            nonce: req.cspNonce
         });
 
     } catch (err) {
@@ -226,6 +242,24 @@ const updateEmployee = async (req, res, next) => {
     }
 };
 
+const toggleEmployeePasswordChange = async (req, res, next) => {
+    try {
+        const employeeId = req.params.id;
+
+        const employee = await User.getUserById(employeeId);
+        if (!employee || employee.role !== 'employee') {
+            return res.status(404).json({ message: 'Töötajat ei leitud' });
+        }
+
+        const currentStatus = employee.must_change_password || false;
+        await User.setMustChangePassword(employeeId, !currentStatus);
+
+        res.json({ message: 'Paroolinõue uuendatud' });
+    } catch (err) {
+        next(err);
+    }
+};
+
 module.exports = {
     getBossPage,
     getRegisterEmployeePage,
@@ -235,5 +269,6 @@ module.exports = {
     updateShift,
     getEmployeesPage,
     getEditEmployeePage,
-    updateEmployee
+    updateEmployee,
+    toggleEmployeePasswordChange
 };

@@ -1,7 +1,7 @@
 const pool = require('../config/db');
 
 const getWorkerByUserId = async (userId) => {
-    const query = `SELECT id FROM worker WHERE user_id = $1 LIMIT 1`;
+    const query = `SELECT id, email, phone FROM worker WHERE user_id = $1 LIMIT 1`;
     const values = [userId];
     const result = await pool.query(query, values);
     return result.rows[0] || null;

@@ -21,6 +21,9 @@ const requireAuth = async (req, res, next) => {
         }
 
         req.user = user;
+        if (user.must_change_password && !req.originalUrl.startsWith('/auth/change-password')) {
+            return res.redirect('/auth/change-password');
+        }
         next();
     } catch (err) {
         res.clearCookie('access_token', cookieOptions);

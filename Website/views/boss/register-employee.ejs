@@ -6,54 +6,84 @@
                 <h1 class="h3 mb-3 text-center">Registreeri töötaja</h1>
                 <p class="text-muted text-center mb-4">Lisa uus töötaja süsteemi</p>
 
-                <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
+                <% if (typeof errorMessage !=='undefined' && errorMessage) { %>
                     <div class="alert alert-danger" role="alert">
                         <%= errorMessage %>
                     </div>
-                <% } %>
+                    <% } %>
 
-                <form action="/boss/register-employee" method="POST" novalidate>
-                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                    <div class="mb-3">
-                        <label for="first_name" class="form-label">Eesnimi</label>
-                        <input type="text" class="form-control" id="first_name" name="first_name" required />
-                    </div>
+                        <form action="/boss/register-employee" method="POST" novalidate>
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <div class="mb-3">
+                                <label for="first_name" class="form-label">Eesnimi</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" required />
+                            </div>
 
-                    <div class="mb-3">
-                        <label for="last_name" class="form-label">Perekonnanimi</label>
-                        <input type="text" class="form-control" id="last_name" name="last_name" required />
-                    </div>
+                            <div class="mb-3">
+                                <label for="last_name" class="form-label">Perekonnanimi</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" required />
+                            </div>
 
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Kasutajanimi</label>
-                        <input type="text" class="form-control" id="username" name="username" required />
-                    </div>
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Kasutajanimi</label>
+                                <input type="text" class="form-control" id="username" name="username" required />
+                            </div>
 
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Parool</label>
-                        <input type="password" class="form-control" id="password" name="password" required minlength="8" />
-                        <small class="text-muted">Vähemalt 8 märki, milles on täht ja number</small>
-                    </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Meiliaadress</label>
+                                <input type="email" class="form-control" id="email" name="email" required />
+                            </div>
 
-                    <div class="mb-3">
-                        <label for="confirm_password" class="form-label">Kinnita parool</label>
-                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required />
-                    </div>
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Telefon</label>
+                                <input type="text" class="form-control" id="phone" name="phone" />
+                            </div>
 
-                    <div class="mb-4">
-                        <label for="role" class="form-label">Role</label>
-                        <select class="form-select" id="role" name="role" required>
-                            <option value="">Vali roll</option>
-                            <option value="employee">Töötaja</option>
-                        </select>
-                    </div>
+                            <div class="mb-4">
+                                <label class="form-label">Lubade kategooriad</label>
+                                <% (licenceCategories || []).forEach(category=> { %>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="licence_category_ids"
+                                            value="<%= category.id %>" id="category-<%= category.id %>"
+                                            <%=(Array.isArray(selectedLicenceIds) &&
+                                            selectedLicenceIds.includes(category.id.toString())) ||
+                                            selectedLicenceIds===category.id.toString() ? 'checked' : '' %>
+                                        >
+                                        <label class="form-check-label" for="category-<%= category.id %>">
+                                            <%= category.code %> — <%= category.name %>
+                                        </label>
+                                    </div>
+                                    <% }) %>
+                            </div>
 
-                    <a href="/boss" class="btn btn-secondary w-100 mb-3">
-                        Tagasi
-                    </a>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Parool</label>
+                                <input type="password" class="form-control" id="password" name="password"
+                                    minlength="8" />
+                                <small class="text-muted">Vähemalt 8 märki, milles on täht ja number. Jäta tühi, kui
+                                    soovid ajutise parooli genereerida.</small>
+                            </div>
 
-                    <button type="submit" class="btn btn-primary w-100">Registreeri</button>
-                </form>
+                            <div class="mb-3">
+                                <label for="confirm_password" class="form-label">Kinnita parool</label>
+                                <input type="password" class="form-control" id="confirm_password"
+                                    name="confirm_password" />
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="role" class="form-label">Role</label>
+                                <select class="form-select" id="role" name="role" required>
+                                    <option value="">Vali roll</option>
+                                    <option value="employee">Töötaja</option>
+                                </select>
+                            </div>
+
+                            <a href="/boss" class="btn btn-secondary w-100 mb-3">
+                                Tagasi
+                            </a>
+
+                            <button type="submit" class="btn btn-primary w-100">Registreeri</button>
+                        </form>
 
             </div>
         </div>
