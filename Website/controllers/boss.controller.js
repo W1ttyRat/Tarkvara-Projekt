@@ -5,9 +5,12 @@ const User = require("../models/User.model");
 
 const getBossPage = async (req, res, next) => {
     try {
+        const boss = await User.getUserById(req.user.id);
+        const bossFirstName = boss?.first_name || 'Boss';
         res.render('boss/boss', {
             title: 'Boss',
             pageClass: 'boss-page',
+            bossName: bossFirstName || 'Boss'
         });
     } catch (err) {
         next(err);
@@ -53,13 +56,13 @@ const getBossSchedulePage = async (req, res, next) => {
             worker: req.query.worker || "",
             status: req.query.status || ""
         };
-        
+
         const shifts =
             await bossScheduleModel.getAllShiftsForBossCalendar(filters);
-        
+
         const locations =
             await locationModel.getAllLocations();
-        
+
         res.render("boss/schedule", {
             title: "Boss Schedule",
             pageClass: "boss-schedule-page",

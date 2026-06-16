@@ -3,8 +3,8 @@
     <div class="col-12 col-sm-10 col-md-8 col-lg-5">
         <div class="card shadow-sm border-0">
             <div class="card-body p-4 p-md-5">
-                <h1 class="h3 mb-3 text-center">Create Account</h1>
-                <p class="text-muted text-center mb-4">Sign up to get started</p>
+                <h1 class="h3 mb-3 text-center">Registreeri töötaja</h1>
+                <p class="text-muted text-center mb-4">Lisa uus töötaja süsteemi</p>
 
                 <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
                     <div class="alert alert-danger" role="alert">
@@ -15,44 +15,46 @@
                 <form action="/boss/register-employee" method="POST" novalidate>
                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                     <div class="mb-3">
-                        <label for="first_name" class="form-label">First Name</label>
+                        <label for="first_name" class="form-label">Eesnimi</label>
                         <input type="text" class="form-control" id="first_name" name="first_name" required />
                     </div>
 
                     <div class="mb-3">
-                        <label for="last_name" class="form-label">Last Name</label>
+                        <label for="last_name" class="form-label">Perekonnanimi</label>
                         <input type="text" class="form-control" id="last_name" name="last_name" required />
                     </div>
 
                     <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
+                        <label for="username" class="form-label">Kasutajanimi</label>
                         <input type="text" class="form-control" id="username" name="username" required />
                     </div>
 
                     <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
+                        <label for="password" class="form-label">Parool</label>
                         <input type="password" class="form-control" id="password" name="password" required minlength="8" />
-                        <small class="text-muted">At least 8 characters, with a letter and a number</small>
+                        <small class="text-muted">Vähemalt 8 märki, milles on täht ja number</small>
                     </div>
 
                     <div class="mb-3">
-                        <label for="confirm_password" class="form-label">Confirm Password</label>
+                        <label for="confirm_password" class="form-label">Kinnita parool</label>
                         <input type="password" class="form-control" id="confirm_password" name="confirm_password" required />
                     </div>
 
                     <div class="mb-4">
                         <label for="role" class="form-label">Role</label>
                         <select class="form-select" id="role" name="role" required>
-                            <option value="">Select Role</option>
-                            <option value="employee">Employee</option>
+                            <option value="">Vali roll</option>
+                            <option value="employee">Töötaja</option>
                         </select>
                     </div>
 
-                    <button type="submit" class="btn btn-primary w-100">Register</button>
+                    <a href="/boss" class="btn btn-secondary w-100 mb-3">
+                        Tagasi
+                    </a>
+
+                    <button type="submit" class="btn btn-primary w-100">Registreeri</button>
                 </form>
 
-                <hr class="my-4" />
-                <p class="text-center text-muted">Already have an account? <a href="/auth/login">Login here</a></p>
             </div>
         </div>
     </div>

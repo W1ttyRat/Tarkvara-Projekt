@@ -74,9 +74,9 @@ class UserModel {
                 u.first_name,
                 u.last_name
         `;
-    
+
         const { rows } = await pool.query(query);
-    
+
         return rows;
     }
 
@@ -98,11 +98,11 @@ class UserModel {
               AND u.role = 'employee'
             LIMIT 1
         `;
-    
+
         const { rows } = await pool.query(query, [userId]);
         return rows[0] || null;
     }
-    
+
     async updateEmployee(userId, firstName, lastName, username, name, email, phone) {
         await pool.query(
             `
@@ -114,7 +114,7 @@ class UserModel {
             `,
             [firstName, lastName, username, userId]
         );
-    
+
         await pool.query(
             `
             UPDATE worker
@@ -126,29 +126,29 @@ class UserModel {
             [name, email, phone, userId]
         );
     }
-    
+
     async getAllLicenceCategories() {
         const query = `
             SELECT id, code, name
             FROM licence_category
             ORDER BY code
         `;
-    
+
         const { rows } = await pool.query(query);
         return rows;
     }
-    
+
     async getWorkerLicenceCategoryIds(workerId) {
         const query = `
             SELECT licence_category_id
             FROM worker_licence_category
             WHERE worker_id = $1
         `;
-    
+
         const { rows } = await pool.query(query, [workerId]);
         return rows.map(row => row.licence_category_id);
     }
-    
+
     async updateWorkerLicenceCategories(workerId, categoryIds) {
         await pool.query(
             `
@@ -157,7 +157,7 @@ class UserModel {
             `,
             [workerId]
         );
-    
+
         for (const categoryId of categoryIds) {
             await pool.query(
                 `
@@ -168,6 +168,18 @@ class UserModel {
                 [workerId, categoryId]
             );
         }
+    }
+
+    async getBossNameById(userId) {
+        const query = `
+            SELECT CONCAT(u.first_name, ' ', u.last_name) AS boss_name
+            FROM users u
+            WHERE u.id = $1 AND u.role = 'boss'
+            LIMIT 1
+        `;
+
+        const { rows } = await pool.query(query, [userId]);
+        return rows[0]?.boss_name || null;
     }
 }
 
