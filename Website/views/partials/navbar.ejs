@@ -5,25 +5,25 @@
 
       <div class="collapse navbar-collapse">
         <ul class="navbar-nav me-auto">
-          <li class="nav-item"><a class="nav-link" href="/booking">Booking</a></li>
+          <li class="nav-item"><a class="nav-link" href="/booking">Broneering</a></li>
           <% if (user) { %>
             <% if (user.role === 'boss') { %>
-              <li class="nav-item"><a class="nav-link" href="/boss">Boss Dashboard</a></li>
+              <li class="nav-item"><a class="nav-link" href="/boss">Bossi töölaud</a></li>
               <li class="nav-item"><a class="nav-link disabled" href="/admin">Admin</a></li>
-              <li class="nav-item"><a class="nav-link" href="/employee">Employee Dashboard</a></li>
+              <li class="nav-item"><a class="nav-link" href="/employee">Töötaja töölaud</a></li>
             <% } else if (user.role === 'employee') { %>
-              <li class="nav-item"><a class="nav-link" href="/employee">Employee Dashboard</a></li>
-              <li class="nav-item"><a class="nav-link" href="/employee/schedule">My Schedule</a></li>
+              <li class="nav-item"><a class="nav-link" href="/employee">Töötaja töölaud</a></li>
+              <li class="nav-item"><a class="nav-link" href="/employee/schedule">Minu graafik</a></li>
             <% } %>
 
             <li class="nav-item">
               <form action="/auth/logout" method="POST" class="d-inline">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                <button type="submit" class="nav-link btn btn-link">Logout</button>
+                <button type="submit" class="nav-link btn btn-link">Logi välja</button>
               </form>
             </li>
           <% } else { %>
-            <li class="nav-item"><a class="nav-link" href="/auth/login">Login</a></li>
+            <li class="nav-item"><a class="nav-link" href="/auth/login">Logi sisse</a></li>
           <% } %>
         </ul>
       </div>
