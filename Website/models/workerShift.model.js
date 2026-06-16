@@ -39,6 +39,7 @@ const getWorkerScheduleForDay = async (workerId, date) => {
             ws.id,
             TO_CHAR(ws.start_time, 'HH24:MI') AS start_time,
             TO_CHAR(ws.end_time, 'HH24:MI') AS end_time,
+            ws.status,
             w.name AS worker_name,
             l.city AS location_city,
             l.address AS location_address
@@ -59,7 +60,7 @@ const getWorkerScheduleForDay = async (workerId, date) => {
 const getWorkerShiftById = async (shiftId) => {
     const result = await pool.query(
         `
-        SELECT id, worker_id, location_id, start_time, end_time
+        SELECT id, worker_id, location_id, start_time, end_time, status
         FROM worker_shift
         WHERE id = $1
         `,

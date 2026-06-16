@@ -80,8 +80,11 @@ function renderCalendar() {
     createDay(day, false);
   }
 
+  let nextMonthDay = 1;
+
   while (calendarGrid.children.length % 7 !== 0) {
-    createDay(calendarGrid.children.length, true);
+    createDay(nextMonthDay, true);
+    nextMonthDay++;
   }
 }
 
@@ -128,7 +131,7 @@ function createDay(day, otherMonth) {
     dayEl.style.backgroundColor = "#ffd54f";
 
     if (shift.status === "approved") {
-      dayEl.style.backgroundColor = "#a9d8b8";
+      dayEl.style.backgroundColor = "#8fd19e";
     } else if (shift.status === "rejected") {
       dayEl.style.backgroundColor = "#cc6868";
     } else {
@@ -149,6 +152,8 @@ function createDay(day, otherMonth) {
 
   if (selectedDates.includes(dateKey)) {
     dayEl.classList.add("selected");
+    dayEl.style.backgroundColor = "#4a90e2";
+    dayEl.style.color = "white";
   }
 
   dayEl.addEventListener("click", () => {
@@ -320,7 +325,69 @@ async function loadDaySchedule(dateKey) {
     });
 
     li.appendChild(info);
-    li.appendChild(editBtn);
+
+    if (shift.status !== "approved") {
+      li.appendChild(editBtn);
+    }
+
+  if (
+      shift.status === "pending" ||
+      shift.status === "rejected"
+  ) {
+      const deleteBtn = document.createElement("button");
+  
+      deleteBtn.type = "button";
+      deleteBtn.textContent = "Kustuta";
+      deleteBtn.className = "delete-shift-btn";
+  
+      deleteBtn.addEventListener(
+          "click",
+          async () => {
+  
+              const confirmed =
+                  confirm(
+                      "Kas oled kindel, et soovid tööaja kustutada?"
+                  );
+  
+              if (!confirmed) {
+                  return;
+              }
+  
+              const response =
+                  await fetch(
+                      `/employee/schedule/${shift.id}`,
+                      {
+                          method: "DELETE",
+                          headers: {
+                              "CSRF-Token":
+                                  window.csrfToken
+                          }
+                      }
+                  );
+  
+              const result =
+                  await response.json();
+  
+              if (!response.ok) {
+                  alert(
+                      result.message ||
+                      "Kustutamine ebaõnnestus"
+                  );
+                  return;
+              }
+  
+              alert(
+                  result.message ||
+                  "Tööaeg kustutatud"
+              );
+  
+              window.location.reload();
+          }
+      );
+  
+      li.appendChild(deleteBtn);
+  }
+
     list.appendChild(li);
   });
 }

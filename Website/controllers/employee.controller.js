@@ -191,6 +191,12 @@ const deleteSchedule = async (req, res, next) => {
             return res.status(403).json({ message: "Saad kustutada ainult enda tööaegu" });
         }
 
+        if (!["pending", "rejected"].includes(shift.status)) {
+            return res.status(403).json({
+                message: "Kinnitatud tööaega ei saa kustutada"
+            });
+        }
+
         const now = new Date();
         const sevenDaysFromNow = new Date();
         sevenDaysFromNow.setDate(now.getDate() + 7);
@@ -239,6 +245,12 @@ const updateSchedule = async (req, res, next) => {
 
         if (shift.worker_id !== workerId) {
             return res.status(403).json({ message: "Saad muuta ainult enda tööaegu" });
+        }
+
+        if (shift.status === "approved") {
+            return res.status(403).json({
+                message: "Kinnitatud tööaega ei saa muuta"
+            });
         }
 
         const shiftDateStr = new Date(shift.start_time)
