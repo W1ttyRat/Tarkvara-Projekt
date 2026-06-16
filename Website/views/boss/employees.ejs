@@ -13,6 +13,8 @@
                     <th>Perenimi</th>
                     <th>Kasutajanimi</th>
                     <th>Roll</th>
+                    <th>Kategooriad</th>
+                    <th>Tegevused</th>
                 </tr>
             </thead>
 
@@ -24,6 +26,17 @@
                         <td><%= employee.last_name %></td>
                         <td><%= employee.username %></td>
                         <td><%= employee.role %></td>
+                        <td>
+                            <%= employee.licence_categories || "Puuduvad" %>
+                        </td>
+                        <td>
+                            <a
+                                href="/boss/employees/<%= employee.id %>/edit"
+                                class="btn btn-sm btn-primary"
+                            >
+                                Muuda
+                            </a>
+                        </td>
                     </tr>
                 <% }) %>
             </tbody>
