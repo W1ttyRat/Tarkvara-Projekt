@@ -47,20 +47,131 @@ class UserModel {
     async getAllEmployees() {
         const query = `
             SELECT
-                id,
-                first_name,
-                last_name,
-                username,
-                role
-            FROM users
-            WHERE role = 'employee'
-            ORDER BY first_name, last_name
+                u.id,
+                u.first_name,
+                u.last_name,
+                u.username,
+                u.role,
+                COALESCE(
+                    STRING_AGG(lc.code, ', ' ORDER BY lc.code),
+                    ''
+                ) AS licence_categories
+            FROM users u
+            LEFT JOIN worker w
+                ON w.user_id = u.id
+            LEFT JOIN worker_licence_category wlc
+                ON wlc.worker_id = w.id
+            LEFT JOIN licence_category lc
+                ON lc.id = wlc.licence_category_id
+            WHERE u.role = 'employee'
+            GROUP BY
+                u.id,
+                u.first_name,
+                u.last_name,
+                u.username,
+                u.role
+            ORDER BY
+                u.first_name,
+                u.last_name
         `;
     
         const { rows } = await pool.query(query);
     
         return rows;
     }
+
+    async getEmployeeForEdit(userId) {
+        const query = `
+            SELECT
+                u.id AS user_id,
+                u.first_name,
+                u.last_name,
+                u.username,
+                u.role,
+                w.id AS worker_id,
+                w.name,
+                w.email,
+                w.phone
+            FROM users u
+            LEFT JOIN worker w ON w.user_id = u.id
+            WHERE u.id = $1
+              AND u.role = 'employee'
+            LIMIT 1
+        `;
+    
+        const { rows } = await pool.query(query, [userId]);
+        return rows[0] || null;
+    }
+    
+    async updateEmployee(userId, firstName, lastName, username, name, email, phone) {
+        await pool.query(
+            `
+            UPDATE users
+            SET first_name = $1,
+                last_name = $2,
+                username = $3
+            WHERE id = $4
+            `,
+            [firstName, lastName, username, userId]
+        );
+    
+        await pool.query(
+            `
+            UPDATE worker
+            SET name = $1,
+                email = $2,
+                phone = $3
+            WHERE user_id = $4
+            `,
+            [name, email, phone, userId]
+        );
+    }
+    
+    async getAllLicenceCategories() {
+        const query = `
+            SELECT id, code, name
+            FROM licence_category
+            ORDER BY code
+        `;
+    
+        const { rows } = await pool.query(query);
+        return rows;
+    }
+    
+    async getWorkerLicenceCategoryIds(workerId) {
+        const query = `
+            SELECT licence_category_id
+            FROM worker_licence_category
+            WHERE worker_id = $1
+        `;
+    
+        const { rows } = await pool.query(query, [workerId]);
+        return rows.map(row => row.licence_category_id);
+    }
+    
+    async updateWorkerLicenceCategories(workerId, categoryIds) {
+        await pool.query(
+            `
+            DELETE FROM worker_licence_category
+            WHERE worker_id = $1
+            `,
+            [workerId]
+        );
+    
+        for (const categoryId of categoryIds) {
+            await pool.query(
+                `
+                INSERT INTO worker_licence_category
+                (worker_id, licence_category_id)
+                VALUES ($1, $2)
+                `,
+                [workerId, categoryId]
+            );
+        }
+    }
 }
+
+
+
 
 module.exports = new UserModel();
