@@ -132,9 +132,10 @@ const createBooking = async (req, res, next) => {
         });
 
         if (!availability.available) {
+            const diagnostics = ` (sobivad tootajad: ${availability.qualifiedWorkers}, kattuvad broneeringud: ${availability.overlappingReservations})`;
             return res.status(400).json({
                 success: false,
-                message: availability.message || 'Valitud aeg ei ole saadaval.'
+                message: (availability.message || 'Valitud aeg ei ole saadaval.') + diagnostics
             });
         }
         const created = await Booking.createReservation({

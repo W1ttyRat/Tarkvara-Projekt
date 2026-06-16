@@ -93,7 +93,7 @@
     const addressSelect = document.getElementById("addressFilter");
     if (!citySelect || !addressSelect) return;
 
-    const locations = <% - JSON.stringify(locations || []) %>;
+    const locations = <%- JSON.stringify(locations || []) %>;
     const selectedAddress = "<%= (selectedFilters || {}).address || '' %>";
 
     const cityToAddresses = locations.reduce((acc, loc) => {
