@@ -272,11 +272,118 @@ const updateSchedule = async (req, res, next) => {
     }
 };
 
+const getEmployeeProfile = async (req, res, next) => {
+    try {
+        const User = require('../models/User.model');
+        const worker = await workerModel.getWorkerByUserId(req.user.id);
+        const user = await User.getUserById(req.user.id);
+
+        res.render('employee/profile', {
+            title: 'Minu profiil',
+            pageClass: 'employee-profile-page',
+            employee: {
+                ...user,
+                email: worker?.email,
+                phone: worker?.phone,
+                worker_id: worker?.id
+            }
+        });
+    } catch (err) {
+        return next(err);
+    }
+};
+
+const getChangePasswordPage = async (req, res, next) => {
+    try {
+        res.render('employee/change-password', {
+            title: 'Muuda parooli',
+            pageClass: 'employee-change-password-page',
+            csrfToken: req.csrfToken(),
+            errorMessage: null
+        });
+    } catch (err) {
+        return next(err);
+    }
+};
+
+const postChangePassword = async (req, res, next) => {
+    try {
+        const bcrypt = require('bcrypt');
+        const User = require('../models/User.model');
+        const RefreshToken = require('../models/RefreshToken.model');
+
+        const { current_password, new_password, confirm_password } = req.body;
+        const userId = req.user.id;
+
+        if (!current_password || !new_password || !confirm_password) {
+            return res.status(400).render('employee/change-password', {
+                title: 'Muuda parooli',
+                pageClass: 'employee-change-password-page',
+                csrfToken: req.csrfToken(),
+                errorMessage: 'Kõik väljad on kohustuslikud.'
+            });
+        }
+
+        if (new_password !== confirm_password) {
+            return res.status(400).render('employee/change-password', {
+                title: 'Muuda parooli',
+                pageClass: 'employee-change-password-page',
+                csrfToken: req.csrfToken(),
+                errorMessage: 'Uued paroolid ei kattu.'
+            });
+        }
+
+        if (new_password.length < 8) {
+            return res.status(400).render('employee/change-password', {
+                title: 'Muuda parooli',
+                pageClass: 'employee-change-password-page',
+                csrfToken: req.csrfToken(),
+                errorMessage: 'Parool peab olema vähemalt 8 tähemärki pikk.'
+            });
+        }
+
+        if (!/\d/.test(new_password) || !/[a-zA-Z]/.test(new_password)) {
+            return res.status(400).render('employee/change-password', {
+                title: 'Muuda parooli',
+                pageClass: 'employee-change-password-page',
+                csrfToken: req.csrfToken(),
+                errorMessage: 'Parool peab sisaldama vähemalt ühte numbrit ja ühte tähte.'
+            });
+        }
+
+        // Verify current password
+        const user = await User.getUserById(userId);
+        const isPasswordValid = await bcrypt.compare(current_password, user.password_hash);
+
+        if (!isPasswordValid) {
+            return res.status(401).render('employee/change-password', {
+                title: 'Muuda parooli',
+                pageClass: 'employee-change-password-page',
+                csrfToken: req.csrfToken(),
+                errorMessage: 'Praegune parool on vale.'
+            });
+        }
+
+        // Update password
+        const newPasswordHash = await bcrypt.hash(new_password, 10);
+        await User.updatePassword(userId, newPasswordHash);
+        await User.incrementSessionVersion(userId);
+        await RefreshToken.revokeAllByUserId(userId);
+
+        res.redirect('/employee/profile');
+    } catch (err) {
+        return next(err);
+    }
+};
+
 module.exports = {
     getEmployeePage,
     getSchedulePage,
     createSchedule,
     getScheduleForDay,
     deleteSchedule,
-    updateSchedule
+    updateSchedule,
+    getEmployeeProfile,
+    getChangePasswordPage,
+    postChangePassword
 };

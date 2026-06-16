@@ -1,50 +1,106 @@
 <div class="container py-5">
     <h1 class="mb-4">Töötajad</h1>
 
-    <% if (employees.length === 0) { %>
+    <% if (employees.length===0) { %>
         <p class="text-muted">Töötajaid ei leitud.</p>
-    <% } else { %>
+        <% } else { %>
 
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Eesnimi</th>
-                    <th>Perenimi</th>
-                    <th>Kasutajanimi</th>
-                    <th>Roll</th>
-                    <th>Kategooriad</th>
-                    <th>Tegevused</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                <% employees.forEach(employee => { %>
+            <table class="table table-striped">
+                <thead>
                     <tr>
-                        <td><%= employee.id %></td>
-                        <td><%= employee.first_name %></td>
-                        <td><%= employee.last_name %></td>
-                        <td><%= employee.username %></td>
-                        <td><%= employee.role %></td>
-                        <td>
-                            <%= employee.licence_categories || "Puuduvad" %>
-                        </td>
-                        <td>
-                            <a
-                                href="/boss/employees/<%= employee.id %>/edit"
-                                class="btn btn-sm btn-primary"
-                            >
-                                Muuda
-                            </a>
-                        </td>
+                        <th>ID</th>
+                        <th>Eesnimi</th>
+                        <th>Perenimi</th>
+                        <th>Kasutajanimi</th>
+                        <th>Roll</th>
+                        <th>Kategooriad</th>
+                        <th>Parool</th>
+                        <th>Tegevused</th>
                     </tr>
-                <% }) %>
-            </tbody>
-        </table>
+                </thead>
 
-    <% } %>
+                <tbody>
+                    <% employees.forEach(employee=> { %>
+                        <tr>
+                            <td>
+                                <%= employee.id %>
+                            </td>
+                            <td>
+                                <%= employee.first_name %>
+                            </td>
+                            <td>
+                                <%= employee.last_name %>
+                            </td>
+                            <td>
+                                <%= employee.username %>
+                            </td>
+                            <td>
+                                <%= employee.role %>
+                            </td>
+                            <td>
+                                <%= employee.licence_categories || "Puuduvad" %>
+                            </td>
+                            <td>
+                                <% if (employee.must_change_password) { %>
+                                    <span class="badge bg-warning text-dark">Muuda nõutav</span>
+                                    <% } else { %>
+                                        <span class="badge bg-success">OK</span>
+                                        <% } %>
+                            </td>
+                            <td>
+                                <a href="/boss/employees/<%= employee.id %>/edit" class="btn btn-sm btn-primary">
+                                    Muuda
+                                </a>
+                                <button type="button" class="btn btn-sm btn-warning toggle-password-btn"
+                                    data-employee-id="<%= employee.id %>">
+                                    <% if (employee.must_change_password) { %>
+                                        Tühista
+                                        <% } else { %>
+                                            Nõua uut parooli
+                                            <% } %>
+                                </button>
+                            </td>
+                        </tr>
+                        <% }) %>
+                </tbody>
+            </table>
 
-    <a href="/boss" class="btn btn-secondary mt-3">
-        Tagasi
-    </a>
+            <% } %>
+
+                <a href="/boss" class="btn btn-secondary mt-3">
+                    Tagasi
+                </a>
 </div>
+
+<script nonce="<%= cspNonce %>">
+    document.addEventListener('DOMContentLoaded', () => {
+        const toggleButtons = document.querySelectorAll('.toggle-password-btn');
+        
+        toggleButtons.forEach(button => {
+            button.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const employeeId = button.getAttribute('data-employee-id');
+                
+                try {
+                    const response = await fetch(`/boss/employees/${employeeId}/toggle-password-change`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-Token': '<%= csrfToken %>'
+                        }
+                    });
+
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        const error = await response.json();
+                        alert('Viga! ' + (error.message || 'Paroolinõude muutmine ebaõnnestus.'));
+                    }
+                } catch (err) {
+                    console.error('Error:', err);
+                    alert('Viga! Paroolinõude muutmine ebaõnnestus.');
+                }
+            });
+        });
+    });
+</script>

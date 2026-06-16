@@ -153,7 +153,9 @@ const getEmployeesPage = async (req, res, next) => {
         res.render("boss/employees", {
             title: "Töötajad",
             pageClass: "employees-page",
-            employees
+            employees,
+            csrfToken: req.csrfToken(),
+            nonce: req.cspNonce
         });
 
     } catch (err) {
@@ -240,6 +242,24 @@ const updateEmployee = async (req, res, next) => {
     }
 };
 
+const toggleEmployeePasswordChange = async (req, res, next) => {
+    try {
+        const employeeId = req.params.id;
+
+        const employee = await User.getUserById(employeeId);
+        if (!employee || employee.role !== 'employee') {
+            return res.status(404).json({ message: 'Töötajat ei leitud' });
+        }
+
+        const currentStatus = employee.must_change_password || false;
+        await User.setMustChangePassword(employeeId, !currentStatus);
+
+        res.json({ message: 'Paroolinõue uuendatud' });
+    } catch (err) {
+        next(err);
+    }
+};
+
 module.exports = {
     getBossPage,
     getRegisterEmployeePage,
@@ -249,5 +269,6 @@ module.exports = {
     updateShift,
     getEmployeesPage,
     getEditEmployeePage,
-    updateEmployee
+    updateEmployee,
+    toggleEmployeePasswordChange
 };

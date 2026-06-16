@@ -1,0 +1,52 @@
+<section class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 p-md-5">
+                    <h1 class="h3 mb-4 text-center">Minu profiil</h1>
+
+                    <div class="profile-info">
+                        <div class="mb-4">
+                            <label class="form-label text-muted">Eesnimi</label>
+                            <p class="fs-6">
+                                <%= employee.first_name %>
+                            </p>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label text-muted">Perekonnanimi</label>
+                            <p class="fs-6">
+                                <%= employee.last_name %>
+                            </p>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label text-muted">Kasutajanimi</label>
+                            <p class="fs-6">
+                                <%= employee.username %>
+                            </p>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label text-muted">E-mail</label>
+                            <p class="fs-6">
+                                <%= employee.email || '-' %>
+                            </p>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label text-muted">Telefon</label>
+                            <p class="fs-6">
+                                <%= employee.phone || '-' %>
+                            </p>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <a href="/employee/change-password" class="btn btn-primary">Muuda parooli</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -20,6 +20,11 @@ router.post(
     "/employees/:id/edit",
     bossController.updateEmployee
 );
+
+router.post(
+    "/employees/:id/toggle-password-change",
+    bossController.toggleEmployeePasswordChange
+);
 router.post('/register-employee', bossController.registerEmployee);
 
 router.patch(

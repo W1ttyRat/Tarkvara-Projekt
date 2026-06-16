@@ -52,6 +52,7 @@ class UserModel {
                 u.last_name,
                 u.username,
                 u.role,
+                u.must_change_password,
                 COALESCE(
                     STRING_AGG(lc.code, ', ' ORDER BY lc.code),
                     ''
@@ -69,7 +70,8 @@ class UserModel {
                 u.first_name,
                 u.last_name,
                 u.username,
-                u.role
+                u.role,
+                u.must_change_password
             ORDER BY
                 u.first_name,
                 u.last_name
