@@ -26,12 +26,26 @@ class BookingModel {
         const qualifiedWorkersQuery = `
                         SELECT COUNT(DISTINCT ws.worker_id)::int AS count
                         FROM worker_shift ws
+                        JOIN location shift_loc
+                            ON shift_loc.id = ws.location_id
+                        JOIN location requested_loc
+                            ON requested_loc.id = $1
                         JOIN worker_licence_category wlc
                             ON wlc.worker_id = ws.worker_id
+                        JOIN licence_category worker_cat
+                            ON worker_cat.id = wlc.licence_category_id
                         JOIN service s
                             ON s.id = $2
-                        WHERE ws.location_id = $1
-                            AND ws.status = 'approved'
+                        JOIN licence_category required_cat
+                            ON required_cat.id = s.required_licence_category_id
+                        WHERE (
+                                        ws.location_id = $1
+                                        OR (
+                                                shift_loc.city = requested_loc.city
+                                                AND COALESCE(shift_loc.address, '') = COALESCE(requested_loc.address, '')
+                                        )
+                                )
+                            AND COALESCE(LOWER(TRIM(ws.status)), 'pending') IN ('approved', 'pending')
                             AND wlc.licence_category_id = s.required_licence_category_id
                             AND ws.start_time <= $3
                             AND ws.end_time >= $4
@@ -46,15 +60,33 @@ class BookingModel {
         const overlappingReservationsQuery = `
                         SELECT COUNT(r.id)::int AS count
                         FROM reservation r
+                        JOIN location reservation_loc
+                            ON reservation_loc.id = r.location_id
+                        JOIN location requested_loc
+                            ON requested_loc.id = $1
                         JOIN service booked_service
                             ON booked_service.id = r.service_id
+                        JOIN licence_category booked_cat
+                            ON booked_cat.id = booked_service.required_licence_category_id
                         JOIN service requested_service
                             ON requested_service.id = $2
-                        WHERE r.location_id = $1
+                        JOIN licence_category requested_cat
+                            ON requested_cat.id = requested_service.required_licence_category_id
+                        WHERE (
+                                        r.location_id = $1
+                                        OR (
+                                                reservation_loc.city = requested_loc.city
+                                                AND COALESCE(reservation_loc.address, '') = COALESCE(requested_loc.address, '')
+                                        )
+                                )
                             AND r.status != 'cancelled'
                             AND r.start_time < $4
                             AND r.end_time > $3
-                            AND booked_service.required_licence_category_id = requested_service.required_licence_category_id
+                                  AND (
+                                      booked_service.required_licence_category_id = requested_service.required_licence_category_id
+                                      OR COALESCE(LOWER(TRIM(booked_cat.code)), '') = COALESCE(LOWER(TRIM(requested_cat.code)), '')
+                                      OR COALESCE(LOWER(TRIM(booked_cat.name)), '') = COALESCE(LOWER(TRIM(requested_cat.name)), '')
+                                    )
                 `;
 
         const overlappingReservationsResult = await this.pool.query(

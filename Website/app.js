@@ -123,6 +123,11 @@ app.use('/employee', employeeRoutes);
 const bossRoutes = require('./routes/boss.routes');
 app.use('/boss', bossRoutes);
 
+// Browsers auto-request favicon.ico. Return 204 if no icon file is present.
+app.get('/favicon.ico', (req, res) => {
+    res.status(204).end();
+});
+
 app.use((req, res, next) => {
     const err = new Error(`Not found - ${req.originalUrl}`);
     err.statusCode = 404;
