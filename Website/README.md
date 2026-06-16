@@ -10,11 +10,9 @@ See rakendus on loodud sõiduki ülevaatuse broneerimise ja töötajate graafiku
 
 ## Projekti autorid
 
-- **Autor 1** — Eesnimi Perekonnanimi
-- **Autor 2** — Eesnimi Perekonnanimi
-- **Autor 3** — Eesnimi Perekonnanimi
-
-> **Märkus:** Asenda autorite nimed päris nimedega enne lõplikku esitamist.
+- **Argo Luur**
+- **Gert Matthias Eljas**
+- **Tanel Metshein**
 
 ## Kasutatud tehnoloogiad ja versioonid
 
