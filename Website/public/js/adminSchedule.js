@@ -128,11 +128,11 @@ function createDay(day, otherMonth) {
     dayEl.style.backgroundColor = "#ffd54f";
 
     if (shift.status === "approved") {
-        dayEl.style.backgroundColor = "#a9d8b8";
+      dayEl.style.backgroundColor = "#a9d8b8";
     } else if (shift.status === "rejected") {
-        dayEl.style.backgroundColor = "#cc6868";
+      dayEl.style.backgroundColor = "#cc6868";
     } else {
-        dayEl.style.backgroundColor = "#ffd54f";
+      dayEl.style.backgroundColor = "#ffd54f";
     }
 
     const start = shift.start_time.substring(11, 16);
@@ -141,10 +141,8 @@ function createDay(day, otherMonth) {
     dayEl.innerHTML += `
       <small>
         ${start}-${end}<br>
-        ${shift.address || ""}
-          ${start}-${end}<br>
-          ${shift.address}<br>
-          ${shift.status}
+        ${shift.address || ""}<br>
+        ${shift.status}
       </small>
     `;
   }

@@ -7,11 +7,16 @@ const ejsLayouts = require('express-ejs-layouts');
 const cookieParser = require('cookie-parser');
 const csurf = require('csurf');
 const helmet = require('helmet');
+const crypto = require('crypto');
 const errorHandler = require('./middleware/error.middleware');
 
 
 // load env vars
 dotenv.config({ path: path.join(__dirname, '.env') });
+
+if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET is required");
+}
 
 // create express app
 const app = express();
@@ -25,6 +30,12 @@ app.use(cors({
     origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
     credentials: true, // allow cookies
 }));
+
+// Create a per-request nonce for inline scripts allowed by CSP.
+app.use((req, res, next) => {
+    res.locals.cspNonce = crypto.randomBytes(16).toString('base64');
+    next();
+});
 
 // configure csurf with secure cookies in production
 app.use(csurf({ cookie: { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax' } }));
@@ -45,7 +56,7 @@ app.get('/api/csrf-token', (req, res) => {
     res.json({ csrfToken: req.csrfToken() });
 });
 
-if (process.env.NODE_ENV === 'production') {
+/* if (process.env.NODE_ENV === 'production') {
     // redirect HTTP to HTTPS
     app.use((req, res, next) => {
         if (req.secure) return next();
@@ -54,11 +65,27 @@ if (process.env.NODE_ENV === 'production') {
 
     // configure HSTS
     app.use(helmet.hsts({ maxAge: 31536000, includeSubDomains: true, preload: true }));
-}
+} */
 
 // configure helmet
+//app.use(helmet({
+//    contentSecurityPolicy: false,
+//}));
+// configure helmet with a strict Content Security Policy that allows only same-origin assets
 app.use(helmet({
-    contentSecurityPolicy: false,
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", (req, res) => `'nonce-${res.locals.cspNonce}'`],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            imgSrc: ["'self'", 'data:'],
+            connectSrc: ["'self'"],
+            fontSrc: ["'self'", 'data:'],
+            objectSrc: ["'none'"],
+            baseUri: ["'self'"],
+            frameAncestors: ["'none'"]
+        }
+    }
 }));
 
 // configure morgan for logging
@@ -117,8 +144,7 @@ app.use((err, req, res, next) => {
     console.error("ERROR:", err);
     console.error("MESSAGE:", err.message);
     console.error("STACK:", err.stack);
-
-    res.status(err.statusCode || 500).send(err.message || "Server error");
+    next(err);
 });
 
 //error handling middleware

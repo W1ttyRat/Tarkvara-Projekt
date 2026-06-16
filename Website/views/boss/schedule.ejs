@@ -7,26 +7,19 @@
             Kõik ülevaatuspunktid
         </option>
 
-        <% locations.forEach(location => { %>
+        <% locations.forEach(location=> { %>
 
-            <option
-                value="<%= location.id %>"
-                <%= filters.location_id == location.id ? "selected" : "" %>
-            >
+            <option value="<%= location.id %>" <%=filters.location_id==location.id ? "selected" : "" %>
+                >
                 <%= location.city %>,
-                <%= location.address %>
+                    <%= location.address %>
             </option>
 
-        <% }) %>
+            <% }) %>
 
     </select>
 
-    <input
-        type="text"
-        name="worker"
-        placeholder="Töötaja nimi"
-        value="<%= filters.worker %>"
-    >
+    <input type="text" name="worker" placeholder="Töötaja nimi" value="<%= filters.worker %>">
 
     <select name="status">
 
@@ -34,24 +27,18 @@
             Kõik staatused
         </option>
 
-        <option
-            value="pending"
-            <%= filters.status === "pending" ? "selected" : "" %>
-        >
+        <option value="pending" <%=filters.status==="pending" ? "selected" : "" %>
+            >
             Ootel
         </option>
 
-        <option
-            value="approved"
-            <%= filters.status === "approved" ? "selected" : "" %>
-        >
+        <option value="approved" <%=filters.status==="approved" ? "selected" : "" %>
+            >
             Kinnitatud
         </option>
 
-        <option
-            value="rejected"
-            <%= filters.status === "rejected" ? "selected" : "" %>
-        >
+        <option value="rejected" <%=filters.status==="rejected" ? "selected" : "" %>
+            >
             Tagasi lükatud
         </option>
 
@@ -93,10 +80,7 @@
             <div>P</div>
         </div>
 
-        <div
-            id="bossCalendarGrid"
-            class="calendar-grid"
-        ></div>
+        <div id="bossCalendarGrid" class="calendar-grid"></div>
 
     </section>
 
@@ -114,27 +98,21 @@
 
 </div>
 
-<script>
+<script nonce="<%= cspNonce %>">
     window.bossShifts =
-        <%- JSON.stringify(shifts) %>;
+        <% - JSON.stringify(shifts) %>;
 </script>
 
-<script>
+<script nonce="<%= cspNonce %>">
     window.locations =
-        <%- JSON.stringify(locations) %>;
+        <% - JSON.stringify(locations) %>;
 </script>
 
-<script>
+<script nonce="<%= cspNonce %>">
     window.csrfToken =
         "<%= csrfToken %>";
 </script>
 
-<link
-    rel="stylesheet"
-    href="/css/pages/bossSchedule.css"
->
+<link rel="stylesheet" href="/css/pages/bossSchedule.css">
 
-<script
-    src="/js/bossSchedule.js"
-    defer
-></script>
+<script src="/js/bossSchedule.js" defer></script>
