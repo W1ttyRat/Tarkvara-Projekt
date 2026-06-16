@@ -22,6 +22,66 @@ class BookingModel {
         return result.rows;
     }
 
+    async getStaffingAvailability({ locationId, serviceId, startTime, endTime }) {
+        const qualifiedWorkersQuery = `
+                        SELECT COUNT(DISTINCT ws.worker_id)::int AS count
+                        FROM worker_shift ws
+                        JOIN worker_licence_category wlc
+                            ON wlc.worker_id = ws.worker_id
+                        JOIN service s
+                            ON s.id = $2
+                        WHERE ws.location_id = $1
+                            AND ws.status = 'approved'
+                            AND wlc.licence_category_id = s.required_licence_category_id
+                            AND ws.start_time <= $3
+                            AND ws.end_time >= $4
+                `;
+
+        const qualifiedWorkersResult = await this.pool.query(
+            qualifiedWorkersQuery,
+            [locationId, serviceId, startTime, endTime]
+        );
+        const qualifiedWorkers = Number(qualifiedWorkersResult.rows[0]?.count || 0);
+
+        const overlappingReservationsQuery = `
+                        SELECT COUNT(r.id)::int AS count
+                        FROM reservation r
+                        JOIN service booked_service
+                            ON booked_service.id = r.service_id
+                        JOIN service requested_service
+                            ON requested_service.id = $2
+                        WHERE r.location_id = $1
+                            AND r.status != 'cancelled'
+                            AND r.start_time < $4
+                            AND r.end_time > $3
+                            AND booked_service.required_licence_category_id = requested_service.required_licence_category_id
+                `;
+
+        const overlappingReservationsResult = await this.pool.query(
+            overlappingReservationsQuery,
+            [locationId, serviceId, startTime, endTime]
+        );
+        const overlappingReservations = Number(overlappingReservationsResult.rows[0]?.count || 0);
+
+        const remainingSlots = qualifiedWorkers - overlappingReservations;
+        const available = remainingSlots > 0;
+
+        let message = null;
+        if (qualifiedWorkers === 0) {
+            message = 'Valitud ajal ei ole nõutud kategooriaga töötajat tööl.';
+        } else if (!available) {
+            message = 'Valitud ajavahemikul on kõik sobiva kategooria töötajad hõivatud.';
+        }
+
+        return {
+            available,
+            qualifiedWorkers,
+            overlappingReservations,
+            remainingSlots: Math.max(0, remainingSlots),
+            message
+        };
+    }
+
     async createReservation({ client_id, vehicle_id, location_id, service_id, start_time, end_time, comment }) {
         const query = `
             INSERT INTO reservation (client_id, vehicle_id, location_id, service_id, start_time, end_time, status, comment)
