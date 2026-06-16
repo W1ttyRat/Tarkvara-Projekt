@@ -1,129 +1,145 @@
 # Tarkvara-Projekt — Website
 
-Professional web application for booking inspections and managing staff schedules. This repository contains the server-rendered Node.js/Express application that provides booking flows, authentication, boss/employee schedule management and the web UI assets.
+> Professional web application for booking vehicle inspections and managing staff schedules.
 
-## Table of Contents
-- Project overview
-- Features
-- Tech stack
-- Installation
-- Configuration
-- Database
-- Running the app
-- File tree (overview)
-- Testing
-- Contributing
-- License
+![Application screenshot](public/images/ui/image.jpg)
 
-## Project overview
+## Eesmärk ja lühikirjeldus
 
-The `Website` project is a server-rendered web application using EJS templates, a PostgreSQL-backed data layer, and an Express server. It supports user authentication (access + refresh tokens), booking management, and schedule administration for bosses and employees.
+See rakendus on loodud sõiduki ülevaatuse broneerimise ja töötajate graafikute haldamise lihtsustamiseks. Süsteem võimaldab klientidel valida sobiva teenuse, asukoha ja aja, arvestades töötajate töögraafikuid ja nende kvalifikatsioone (juhiloa kategooriad). Tööandjad saavad hallata töötajate vahetusi ja broneeringuid, töötajad näevad oma graafikuid ning kõik toimub läbi ühtse veebiliidese. Rakendus on loodud **Tallinna Tehnikaülikooli** aine "Tarkvara arenduse praktika" raames.
 
-## Features
+## Projekti autorid
 
-- User authentication (login/register) with JWT access & refresh tokens
-- Booking creation and availability checks
-- Boss and employee schedule management UI
-- Email notifications (via service integration)
-- Rate limiting and error handling middleware
+- **Autor 1** — Eesnimi Perekonnanimi
+- **Autor 2** — Eesnimi Perekonnanimi
+- **Autor 3** — Eesnimi Perekonnanimi
 
-## Tech stack
+> **Märkus:** Asenda autorite nimed päris nimedega enne lõplikku esitamist.
 
-- Node.js (18+ recommended)
-- Express
-- EJS for server-side views
-- PostgreSQL
-- Vanilla JavaScript for client-side interactions
+## Kasutatud tehnoloogiad ja versioonid
 
-## Installation
+| Tehnoloogia         | Versioon        |
+|---------------------|-----------------|
+| Node.js             | 18+ (soovituslik) |
+| Express             | ^5.2.1          |
+| EJS                 | ^5.0.1          |
+| express-ejs-layouts | ^2.5.1          |
+| PostgreSQL          | — (andmebaas)   |
+| pg (PostgreSQL driver) | ^8.21.0      |
+| bcryptjs            | ^3.0.3          |
+| jsonwebtoken        | ^9.0.3          |
+| helmet              | ^8.1.0          |
+| csurf               | ^1.11.0         |
+| dotenv              | ^17.4.2         |
+| morgan              | ^1.10.1         |
+| express-rate-limit  | ^8.5.2          |
+| resend (e-post)     | ^6.12.4         |
+| cookie-parser       | ^1.4.7          |
+| nodemon (arendus)   | ^3.1.14         |
 
-1. Clone the repo and change into the `Website` directory.
+Täieliku loetelu leiab `package.json` failist.
+
+## Paigaldusjuhised ja arenduskeskkonna ülesseadmine
+
+### Eeltingimused
+
+- **Node.js** (versioon 18 või uuem)
+- **PostgreSQL** andmebaas (lokaalne või pilves)
+- **npm** (kaasas Node.js-ga)
+- **Git** versioonihalduseks
+
+### Samm-sammuline paigaldus
+
+#### 1. Repositooriumi kloonimine
 
 ```bash
-git clone <repo-url>
+git clone <repositooriumi-url>
 cd Tarkvara-Projekt/Website
+```
+
+#### 2. Sõltuvuste paigaldamine
+
+```bash
 npm install
 ```
 
-2. Create a `.env` file with the minimum environment variables (see Configuration).
+#### 3. Keskkonnamuutujate seadistamine
 
-## Configuration
+Loo projekti kausta (`Website/`) fail nimega `.env` järgmiste väärtustega:
 
-Create a `.env` file at the project root with at least the following values:
-
-```
+```env
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=your_db
-DB_USER=your_user
-DB_PASSWORD=your_password
-JWT_SECRET=your_jwt_secret
-RESEND_API_KEY=your_resend_key
+DB_NAME=sinu_andmebaas
+DB_USER=sinu_kasutaja
+DB_PASSWORD=sinu_parool
+JWT_SECRET=sinu_salajane_voti
+RESEND_API_KEY=sinu_resend_voti
 NODE_ENV=development
 PORT=3000
 ```
 
-Refer to `config/db.js` for exact DB env var usage.
+> **Märkus:** `JWT_SECRET` peab olema vähemalt 32 tähemärki pikk juhuslik string. `RESEND_API_KEY` on vajalik e-kirjade saatmiseks (Resend teenuse kaudu).
 
-## Database
+#### 4. Andmebaasi loomine
 
-This project expects a PostgreSQL database. The SQL schema is available under `database/schemas/db.sql`. Create the database and run the schema script or use your preferred migration tool to create the required tables (`users`, `worker`, `location`, `service`, `reservation`, `worker_shift`, `refresh_tokens`, etc.).
+Loo PostgreSQL-is uus andmebaas:
 
-## Running the app
+```sql
+CREATE DATABASE sinu_andmebaas;
+```
 
-Start the server:
+Seejärel käivita andmebaasi skeemi fail. Skript asub `database/schemas/db.sql`. Käivitamiseks kasuta:
 
 ```bash
-node server.js
-# or with nodemon
-npx nodemon server.js
+psql -U sinu_kasutaja -d sinu_andmebaas -f database/schemas/db.sql
 ```
 
-The server listens on `PORT` (default `3000`). Open `http://localhost:3000`.
+Skeem loob järgmised tabelid:
 
-## File tree (overview)
+- `users` — kasutajad (töötajad ja juhid)
+- `client` — kliendid
+- `worker` — töötajad
+- `licence_category` — juhiloa kategooriad (nt B, C, CE)
+- `vehicle` — sõidukid
+- `location` — asukohad (ülevaatuspunktid koos uste mõõtudega)
+- `service` — teenused (nt ülevaatus, lisatööd)
+- `reservation` — broneeringud
+- `worker_shift` — töötajate vahetused
+- `worker_licence_category` — töötajate kvalifikatsioonid
+- `refresh_tokens` — JWT refresh tokenid
+- `unavailable_time` — töötajate mitte-kättesaadavad ajad
 
-Top-level layout (abridged):
+#### 5. Rakenduse käivitamine
 
+Arendusrežiimis:
+
+```bash
+npm run dev
 ```
-.
-├─ app.js
-├─ server.js
-├─ package.json
-├─ config/
-│  └─ db.js
-├─ controllers/
-├─ models/
-├─ routes/
-├─ services/
-├─ middleware/
-├─ public/ (static assets)
-├─ views/ (EJS templates)
-├─ database/schemas/db.sql
-└─ tests/
+
+Tootmisrežiimis:
+
+```bash
+npm start
 ```
 
-For a full listing, explore the repository. Key files:
+Rakendus on nüüd kättesaadav aadressil: **http://localhost:3000**
 
-- `app.js` — Express app configuration (security middleware, csurf, routes)
-- `server.js` — server entry point
-- `config/db.js` — PostgreSQL pool configuration
-- `controllers/` — request handlers
-- `models/` — DB layer and queries
-- `public/js/` — client-side JS used by booking and schedule pages
+### Levinud probleemid ja lahendused
 
-## Testing
+| Probleem | Lahendus |
+|----------|----------|
+| `JWT_SECRET is required` | Lisa `.env` faili `JWT_SECRET` väärtus |
+| `ECONNREFUSED` andmebaasiga | Kontrolli, et PostgreSQL on käivitatud ja `.env` andmed on õiged |
+| Port juba kasutuses | Muuda `PORT` väärtust `.env` failis või tapa protsess, mis porti kasutab |
 
-There are test stubs under `tests/`. To add automated tests, export the Express `app` from `app.js` and use a test runner (Jest/Mocha) with a test database.
+## Litsents
 
-## Contributing
+See projekt on litsentseeritud **GNU General Public License v3.0** tingimustel. Lisateavet leiad repositooriumi juures olevast `LICENSE` failist.
 
-- Fork the repository and create a feature branch.
-- Add or update tests where applicable.
-- Open a pull request with a clear description of changes.
+---
 
-## License
-
-See the `LICENSE` file at the repository root.
+*Projekt loodud Tallinna Tehnikaülikooli aine "Tarkvara arenduse praktika" raames.*
 
 
