@@ -19,9 +19,13 @@ const getBossPage = async (req, res, next) => {
 
 const getRegisterEmployeePage = async (req, res, next) => {
     try {
+        const licenceCategories = await User.getAllLicenceCategories();
+
         res.render('boss/register-employee', {
             title: 'Register Employee',
             pageClass: 'register-employee-page',
+            licenceCategories,
+            selectedLicenceIds: []
         });
     } catch (err) {
         next(err);
@@ -30,18 +34,28 @@ const getRegisterEmployeePage = async (req, res, next) => {
 
 const registerEmployee = async (req, res, next) => {
     try {
+        let { licence_category_ids = [] } = req.body;
+
+        if (!Array.isArray(licence_category_ids)) {
+            licence_category_ids = licence_category_ids ? [licence_category_ids] : [];
+        }
+
         await authService.registerUser({
             ...req.body,
-            role: 'employee'
+            role: 'employee',
+            licence_category_ids
         });
 
         res.redirect('/boss');
     } catch (err) {
         if (err.statusCode && err.statusCode >= 400 && err.statusCode < 500) {
+            const licenceCategories = await User.getAllLicenceCategories();
             return res.status(err.statusCode).render('boss/register-employee', {
                 title: 'Register Employee',
                 pageClass: 'register-employee-page',
                 errorMessage: err.message,
+                licenceCategories,
+                selectedLicenceIds: req.body.licence_category_ids || []
             });
         }
         next(err);

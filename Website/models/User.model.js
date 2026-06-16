@@ -11,13 +11,13 @@ class UserModel {
     }
 
     async getUserByUsername(username) {
-        const query = `SELECT id, first_name, last_name, username, password_hash, role, session_version, failed_attempts, locked_until FROM users WHERE username = $1 LIMIT 1`;
+        const query = `SELECT id, first_name, last_name, username, password_hash, role, session_version, failed_attempts, locked_until, must_change_password FROM users WHERE username = $1 LIMIT 1`;
         const { rows } = await pool.query(query, [username]);
         return rows[0] || null;
     }
 
     async getUserById(id) {
-        const query = 'SELECT id, first_name, last_name, username, password_hash, role, session_version, failed_attempts, locked_until FROM users WHERE id = $1 LIMIT 1';
+        const query = 'SELECT id, first_name, last_name, username, password_hash, role, session_version, failed_attempts, locked_until, must_change_password FROM users WHERE id = $1 LIMIT 1';
         const { rows } = await pool.query(query, [id]);
         return rows[0] || null;
     }
@@ -180,6 +180,14 @@ class UserModel {
 
         const { rows } = await pool.query(query, [userId]);
         return rows[0]?.boss_name || null;
+    }
+
+    async updatePassword(userId, passwordHash) {
+        await pool.query(`UPDATE users SET password_hash = $1 WHERE id = $2`, [passwordHash, userId]);
+    }
+
+    async setMustChangePassword(userId, flag = true) {
+        await pool.query(`UPDATE users SET must_change_password = $1 WHERE id = $2`, [flag, userId]);
     }
 }
 
