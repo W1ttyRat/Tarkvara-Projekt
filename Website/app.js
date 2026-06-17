@@ -9,6 +9,7 @@ const csurf = require('csurf');
 const helmet = require('helmet');
 const crypto = require('crypto');
 const errorHandler = require('./middleware/error.middleware');
+const session = require("express-session");
 
 
 // load env vars
@@ -24,6 +25,17 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+app.use(session({
+    secret: process.env.SESSION_SECRET || "dev-secret-change-later",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production"
+    }
+}));
 
 // configure CORS before csurf so preflight/headers are set
 app.use(cors({

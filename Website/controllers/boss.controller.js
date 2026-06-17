@@ -7,10 +7,12 @@ const getBossPage = async (req, res, next) => {
     try {
         const boss = await User.getUserById(req.user.id);
         const bossFirstName = boss?.first_name || 'Boss';
+        const stats = await bossScheduleModel.getBossDashboardStats();
         res.render('boss/boss', {
             title: 'Boss',
             pageClass: 'boss-page',
-            bossName: bossFirstName || 'Boss'
+            bossName: bossFirstName || 'Boss',
+            stats
         });
     } catch (err) {
         next(err);

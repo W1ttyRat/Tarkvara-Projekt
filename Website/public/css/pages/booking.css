@@ -116,3 +116,251 @@
     min-height: 38px;
   }
 }
+
+.booking-hero {
+  min-height: 520px;
+  background: #004aad;
+  color: white;
+  text-align: center;
+  padding: 70px 20px;
+}
+
+.booking-hero h1 {
+  font-size: 34px;
+  font-weight: 800;
+  margin-bottom: 70px;
+}
+
+.booking-hero h2 {
+  font-size: 34px;
+  font-weight: 800;
+  margin-bottom: 20px;
+}
+
+.booking-start-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.booking-start-form label {
+  font-size: 22px;
+}
+
+.booking-start-form input {
+  width: 240px;
+  padding: 10px;
+  font-size: 30px;
+  text-align: center;
+  border: 3px solid #222;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.booking-start-form button {
+  width: 120px;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  background: white;
+  color: #004aad;
+  font-weight: 800;
+}
+
+.booking-error {
+  background: #ffe0e0;
+  color: #b00020;
+  display: inline-block;
+  padding: 10px 14px;
+  border-radius: 6px;
+}
+
+.booking-page {
+  background: #f6f8fc;
+}
+
+.booking-step {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 36px;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 8px 28px rgba(0, 42, 100, 0.08);
+}
+
+.booking-step h1 {
+  text-align: center;
+  color: #082452;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.booking-subtitle {
+  text-align: center;
+  color: #52627a;
+  font-size: 18px;
+}
+
+.booking-step-form,
+.booking-time-form,
+.booking-contact-form {
+  display: grid;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.booking-step-form label,
+.booking-contact-form label {
+  font-weight: 700;
+  color: #082452;
+}
+
+.booking-step-form select,
+.booking-contact-form input,
+.booking-contact-form textarea {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid #d6deea;
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+.booking-step-form button,
+.booking-time-form button[type="submit"],
+.booking-contact-form button,
+.booking-step a {
+  display: inline-block;
+  width: fit-content;
+  padding: 13px 30px;
+  border: none;
+  border-radius: 10px;
+  background: #004aad;
+  color: white;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+  transition: 0.15s;
+}
+
+.booking-step-form button:hover,
+.booking-time-form button[type="submit"]:hover,
+.booking-contact-form button:hover,
+.booking-step a:hover {
+  background: #003a8c;
+  transform: translateY(-2px);
+}
+
+.booking-calendar-wrap {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #dbe5f2;
+  padding: 22px;
+  box-shadow: 0 4px 16px rgba(0, 42, 100, 0.06);
+}
+
+.calendar-header {
+  background: #004aad;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.calendar-day {
+  min-height: 56px;
+  border-radius: 10px;
+  transition: 0.15s;
+}
+
+.calendar-day:hover:not(:disabled) {
+  background: #eaf2ff;
+  border-color: #004aad;
+}
+
+.calendar-day.selected {
+  background: #004aad;
+  color: white;
+}
+
+.time-buttons button {
+  border-radius: 999px;
+  padding: 9px 16px;
+  cursor: pointer;
+}
+
+.time-buttons button.active {
+  background: #004aad;
+  border-color: #004aad;
+}
+
+#availability-msg,
+#fit-msg {
+  font-weight: 700;
+  margin: 10px 0;
+}
+
+.booking-hero {
+  max-width: 1100px;
+  min-height: auto;
+  margin: 40px auto;
+  padding: 56px 36px;
+  background: white;
+  color: #082452;
+  border-radius: 18px;
+  box-shadow: 0 8px 28px rgba(0, 42, 100, 0.08);
+}
+
+.booking-hero h1 {
+  font-size: 34px;
+  margin-bottom: 18px;
+}
+
+.booking-hero h2 {
+  font-size: 22px;
+  color: #52627a;
+  margin-bottom: 34px;
+}
+
+.booking-start-form label {
+  color: #082452;
+  font-weight: 700;
+}
+
+.booking-start-form input {
+  width: 320px;
+  max-width: 100%;
+  padding: 14px;
+  font-size: 42px;
+  border: 3px solid #1c2f4a;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 42, 100, 0.12);
+}
+
+.booking-start-form button {
+  width: auto;
+  min-width: 150px;
+  padding: 14px 34px;
+  border-radius: 10px;
+  background: #004aad;
+  color: white;
+  font-size: 18px;
+}
+
+.booking-start-form button:hover {
+  background: #003a8c;
+  transform: translateY(-2px);
+}
+
+.time-buttons button.unavailable-time,
+.time-buttons button:disabled {
+  background: #e5e7eb;
+  color: #9ca3af;
+  border-color: #d1d5db;
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+.time-buttons button.unavailable-time:hover,
+.time-buttons button:disabled:hover {
+  transform: none;
+  background: #e5e7eb;
+}

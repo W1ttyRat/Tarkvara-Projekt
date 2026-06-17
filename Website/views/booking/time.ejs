@@ -1,0 +1,61 @@
+<section class="booking-step">
+    <h1>Vali sobiv aeg</h1>
+
+    <p class="booking-subtitle">
+        Auto:
+        <strong><%= draft.registration_number %></strong>
+    </p>
+
+    <form method="POST" action="/booking/time" class="booking-time-form">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+        <div id="availability-msg"></div>
+
+        <div class="booking-calendar-wrap">
+            <div class="calendar-header">
+                <button id="prevMonth" type="button">&lt;</button>
+                <h3 id="monthTitle"></h3>
+                <button id="nextMonth" type="button">&gt;</button>
+            </div>
+
+            <div class="calendar-weekdays">
+                <div>E</div>
+                <div>T</div>
+                <div>K</div>
+                <div>N</div>
+                <div>R</div>
+                <div>L</div>
+                <div>P</div>
+            </div>
+
+            <div id="calendarGrid" class="calendar-grid"></div>
+
+            <div class="time-picker">
+                <p>Vali kellaaeg:</p>
+                <div id="timeButtons" class="time-buttons"></div>
+            </div>
+
+            <p id="selectedDateTime" class="selected-date-time">
+                Valik puudub
+            </p>
+        </div>
+
+        <input
+            type="hidden"
+            id="start_time"
+            name="start_time"
+            required
+        >
+
+        <button type="submit">
+            Edasi
+        </button>
+    </form>
+</section>
+
+<script nonce="<%= cspNonce %>">
+    window.bookingDraft = <%- JSON.stringify(draft) %>;
+</script>
+
+<link rel="stylesheet" href="/css/pages/booking.css">
+<script src="/js/bookingTime.js" defer></script>

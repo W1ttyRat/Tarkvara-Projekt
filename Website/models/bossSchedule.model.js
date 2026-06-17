@@ -82,8 +82,39 @@ const updateShift = async (
     return result.rows[0];
 };
 
+const getBossDashboardStats = async () => {
+    const pendingResult = await pool.query(`
+        SELECT COUNT(*) AS count
+        FROM worker_shift
+        WHERE status = 'pending'
+    `);
+
+    const emptyDaysResult = await pool.query(`
+        WITH days AS (
+            SELECT generate_series(
+                date_trunc('month', CURRENT_DATE),
+                date_trunc('month', CURRENT_DATE) + INTERVAL '1 month - 1 day',
+                INTERVAL '1 day'
+            )::date AS day
+        )
+        SELECT COUNT(*) AS count
+        FROM days d
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM worker_shift ws
+            WHERE ws.start_time::date = d.day
+        )
+    `);
+
+    return {
+        pendingRequests: Number(pendingResult.rows[0].count),
+        emptyDaysThisMonth: Number(emptyDaysResult.rows[0].count)
+    };
+};
+
 module.exports = {
     getAllShiftsForBossCalendar,
     updateShiftStatus,
-    updateShift
+    updateShift,
+    getBossDashboardStats
 };
