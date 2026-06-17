@@ -175,9 +175,9 @@ const getScheduleForDay = async (req, res, next) => {
 const deleteSchedule = async (req, res, next) => {
     try {
         const workerId = await getWorkerIdForCurrentUser(req.user.id);
-        const shiftId = req.params.id;
+        const shiftId = parseInt(req.params.id, 10);
 
-        if (isNaN(Number(shiftId))) {
+        if (Number.isNaN(shiftId)) {
             return res.status(400).json({ message: "Vigane tööaja ID" });
         }
 
@@ -219,9 +219,9 @@ const updateSchedule = async (req, res, next) => {
             return res.status(404).json({ message: "Töötajat ei leitud" });
         }
 
-        const shiftId = req.params.id;
+        const shiftId = parseInt(req.params.id, 10);
 
-        if (!Number.isInteger(shiftId)) {
+        if (Number.isNaN(shiftId)) {
             return res.status(400).json({ message: "Vigane tööaja ID" });
         }
 
