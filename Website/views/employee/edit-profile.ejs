@@ -1,0 +1,51 @@
+<section class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 p-md-5">
+                    <h1 class="h3 mb-4 text-center">Muuda profiili</h1>
+
+                    <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
+                        <div class="alert alert-danger">
+                            <%= errorMessage %>
+                        </div>
+                    <% } %>
+
+                    <form action="/employee/profile/edit" method="POST">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                        <div class="mb-3">
+                            <label for="first_name" class="form-label text-muted">Eesnimi</label>
+                            <input type="text" class="form-control" id="first_name" name="first_name" value="<%= employee.first_name %>" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="last_name" class="form-label text-muted">Perekonnanimi</label>
+                            <input type="text" class="form-control" id="last_name" name="last_name" value="<%= employee.last_name %>" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="username" class="form-label text-muted">Kasutajanimi</label>
+                            <input type="text" class="form-control" id="username" name="username" value="<%= employee.username %>" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label text-muted">E-mail</label>
+                            <input type="email" class="form-control" id="email" name="email" value="<%= employee.email || '' %>" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="phone" class="form-label text-muted">Telefon</label>
+                            <input type="text" class="form-control" id="phone" name="phone" value="<%= employee.phone || '' %>">
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">Salvesta muudatused</button>
+                            <a href="/employee/profile" class="btn btn-outline-secondary">Tühista</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

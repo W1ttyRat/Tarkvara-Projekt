@@ -175,9 +175,9 @@ const getScheduleForDay = async (req, res, next) => {
 const deleteSchedule = async (req, res, next) => {
     try {
         const workerId = await getWorkerIdForCurrentUser(req.user.id);
-        const shiftId = req.params.id;
+        const shiftId = parseInt(req.params.id, 10);
 
-        if (isNaN(Number(shiftId))) {
+        if (Number.isNaN(shiftId)) {
             return res.status(400).json({ message: "Vigane tööaja ID" });
         }
 
@@ -225,9 +225,9 @@ const updateSchedule = async (req, res, next) => {
             return res.status(404).json({ message: "Töötajat ei leitud" });
         }
 
-        const shiftId = req.params.id;
+        const shiftId = parseInt(req.params.id, 10);
 
-        if (!Number.isInteger(shiftId)) {
+        if (Number.isNaN(shiftId)) {
             return res.status(400).json({ message: "Vigane tööaja ID" });
         }
 
@@ -376,6 +376,84 @@ const postChangePassword = async (req, res, next) => {
     }
 };
 
+const getEditProfilePage = async (req, res, next) => {
+    try {
+        const User = require('../models/User.model');
+        const worker = await workerModel.getWorkerByUserId(req.user.id);
+        const user = await User.getUserById(req.user.id);
+
+        res.render('employee/edit-profile', {
+            title: 'Muuda profiili',
+            pageClass: 'employee-edit-profile-page',
+            csrfToken: req.csrfToken(),
+            errorMessage: null,
+            employee: {
+                ...user,
+                email: worker?.email,
+                phone: worker?.phone
+            }
+        });
+    } catch (err) {
+        return next(err);
+    }
+};
+
+const updateProfile = async (req, res, next) => {
+    try {
+        const User = require('../models/User.model');
+        const { first_name, last_name, username, email, phone } = req.body;
+        const userId = req.user.id;
+
+        if (!first_name || !last_name || !username || !email) {
+            const worker = await workerModel.getWorkerByUserId(userId);
+            const user = await User.getUserById(userId);
+            return res.status(400).render('employee/edit-profile', {
+                title: 'Muuda profiili',
+                pageClass: 'employee-edit-profile-page',
+                csrfToken: req.csrfToken(),
+                errorMessage: 'Kõik kohustuslikud väljad peavad olema täidetud.',
+                employee: {
+                    ...user,
+                    email: worker?.email,
+                    phone: worker?.phone
+                }
+            });
+        }
+
+        // Check if username is already taken by another user
+        const existingUser = await User.getUserByUsername(username);
+        if (existingUser && existingUser.id !== userId) {
+            const worker = await workerModel.getWorkerByUserId(userId);
+            const user = await User.getUserById(userId);
+            return res.status(400).render('employee/edit-profile', {
+                title: 'Muuda profiili',
+                pageClass: 'employee-edit-profile-page',
+                csrfToken: req.csrfToken(),
+                errorMessage: 'Kasutajanimi on juba võetud.',
+                employee: {
+                    ...user,
+                    email: worker?.email,
+                    phone: worker?.phone
+                }
+            });
+        }
+
+        await User.updateEmployee(
+            userId,
+            first_name,
+            last_name,
+            username,
+            `${first_name} ${last_name}`,
+            email,
+            phone
+        );
+
+        res.redirect('/employee/profile');
+    } catch (err) {
+        return next(err);
+    }
+};
+
 module.exports = {
     getEmployeePage,
     getSchedulePage,
@@ -385,5 +463,7 @@ module.exports = {
     updateSchedule,
     getEmployeeProfile,
     getChangePasswordPage,
-    postChangePassword
+    postChangePassword,
+    getEditProfilePage,
+    updateProfile
 };

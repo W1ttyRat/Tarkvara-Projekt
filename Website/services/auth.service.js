@@ -4,7 +4,6 @@ const Worker = require('../models/worker.model');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const RefreshToken = require('../models/RefreshToken.model');
-const { token } = require('morgan');
 const emailService = require('./email.service');
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -57,7 +56,6 @@ class AuthService {
         let tempPassword = null;
         if (!password && !confirm_password) {
             tempPassword = crypto.randomBytes(8).toString('base64').slice(0, 12);
-            console.log(`Generated temporary password for ${username}: ${tempPassword}`);
             password = tempPassword;
             confirm_password = tempPassword;
         }
