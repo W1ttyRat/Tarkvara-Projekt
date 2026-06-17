@@ -18,7 +18,9 @@ See rakendus on loodud sõiduki ülevaatuse broneerimise ja töötajate graafiku
 
 <img width="1339" height="897" alt="image" src="https://github.com/user-attachments/assets/1c345c9a-80cd-4921-932a-6e7f184efb4b" />
 
->Juhend asub kaustas Tarkvara-Projekt/Website/README.md
+### Juhend asub kaustas Tarkvara-Projekt/Website/README.md
+
+
 
 ## Numbrimärgituvastus
 
