@@ -4,7 +4,6 @@ const Worker = require('../models/worker.model');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const RefreshToken = require('../models/RefreshToken.model');
-const { token } = require('morgan');
 const emailService = require('./email.service');
 
 const JWT_SECRET = process.env.JWT_SECRET;
