@@ -1,69 +1,129 @@
-# PythonCamera — ALPR tools
+## Tehnoloogiad
 
-This folder contains Python utilities used for Automatic License Plate Recognition (ALPR) and simple camera-based experiments referenced by the project. The scripts are intended as a companion toolset for detecting license plates from images and video.
+- Python
+- OpenCV
+- fast_alpr
+- mss
+- numpy
 
-## Contents
+## Eeldused
 
-- `detFromImage.py` — Detect plates from a single image (file input).
-- `detFromVideo.py` — Process video stream or file and detect plates frame-by-frame.
+Enne käivitamist veendu, et süsteemis on olemas:
 
-## Prerequisites
+- Python 3.9 või uuem
+- Pip
 
-- Python 3.9+
-- A working virtual environment (recommended)
-- System dependencies for OpenCV (on Windows, the `opencv-python` wheel is usually sufficient)
+## Paigaldus
 
-## Installation
+1. Ava terminal projekti juurkaustas.
+2. Loo virtuaalkeskkond:
 
-From the `PythonCamera` directory:
-
-```bash
+```powershell
 python -m venv .venv
-# Activate on Windows PowerShell:
+```
+
+3. Aktiveeri virtuaalkeskkond (Windows PowerShell):
+
+```powershell
 .\.venv\Scripts\Activate.ps1
-# or on cmd.exe:
-.\.venv\Scripts\activate.bat
-# or on macOS / Linux:
-source .venv/bin/activate
-
-pip install --upgrade pip
-pip install opencv-python numpy mss
-# If the project used a specific ALPR lib (fast_alpr) install it if available:
-# pip install fast-alpr
 ```
 
-Note: If additional packages are required by the scripts, they will be listed at the top of each script file.
+4. Paigalda vajalikud paketid:
 
-## Usage
-
-Detect from an image:
-
-```bash
-python detFromImage.py --image path/to/image.jpg
+```powershell
+pip install opencv-python fast-alpr mss numpy
 ```
 
-Process a video file or camera stream:
+## Kasutamine
 
-```bash
-python detFromVideo.py --source path/to/video.mp4
-# or to use the default webcam device
-python detFromVideo.py --source 0
+Oluline: käivita skriptid kaustast `PythonCamera`, et suhtelised teed töötaksid (näiteks `AnnotatedImages/` ja `TestImages/`).
+
+```powershell
+cd PythonCamera
 ```
 
-Check the top of each script for available command-line options and flags.
+### 1) Pildi töötlemine
 
-## Output
+Skript: `detFromImage.py`
 
-Scripts typically print detected plate text and bounding boxes to stdout and/or overlay detections on a displayed window. Modify the scripts to save results to disk if persistent logs are required.
+```powershell
+python detFromImage.py
+```
 
-## Troubleshooting
+Vaikimisi loeb skript faili `TestImages/image2.jpg`, joonistab tuvastused ja salvestab tulemuse faili:
 
-- If OpenCV fails to open the camera, ensure no other process is using it and try different device indices (0,1,...).
-- On Windows, ensure `opencv-python` wheel matches your Python version and architecture.
-- For low detection rates, adjust image pre-processing (grayscale, histogram equalization) and detection model thresholds.
+- `AnnotatedImages/annotated_image.jpg`
 
-## License & Safety
+Lisaks kuvatakse terminalis iga leitud numbri kohta:
 
-Be mindful of local laws and privacy concerns when using ALPR technology. Use for authorized, ethical, and lawful purposes only.
+- numbrimärgi tekst
+- OCR kindlus
+- tuvastuse kindlus
+- bounding box
 
+### 2) Video või veebikaamera töötlemine
 
+Skript: `detFromVideo.py`
+
+Failis on järgmised variandid:
+
+- Veebikaamera: `process_video(0)`
+- Videofail: `process_video("carvideo.mp4")`
+- Monitori salvestus: `process_monitor(2, duration_seconds=25)`
+
+Käivita:
+
+```powershell
+python detFromVideo.py
+```
+
+Vaikimisi on aktiivne monitori salvestus (`process_monitor`).
+
+## Väljund
+
+Skript `detFromVideo.py` kogub unikaalsed numbrimärgid ja salvestab need faili:
+
+- `carlist.json`
+
+JSON-objekti väljad:
+
+- `plate`: tuvastatud numbrimärgi tekst
+- `ocr_confidence`: OCR mudeli kindlus
+- `det_confidence`: detektori kindlus
+
+Näide:
+
+```json
+[
+  {
+    "plate": "WV54LUT",
+    "ocr_confidence": 0.99,
+    "det_confidence": 0.84
+  }
+]
+```
+
+## Olulised seadistused
+
+Failides `detFromImage.py` ja `detFromVideo.py` kasutatakse:
+
+- Detektorimudel: `yolo-v9-t-384-license-plate-end2end`
+- OCR mudel: `cct-xs-v1-global-model`
+
+Kindluse läved:
+
+- Logimiseks kasutatakse üldjuhul läve `0.6`.
+- JSON-i lisamiseks monitori reziimis kasutatakse rangemat tingimust:
+  - `ocr_confidence > 0.98`
+  - `det_confidence > 0.82`
+
+Vajadusel saad neid väärtusi koodis muuta.
+
+## Levinud probleemid
+
+- `ModuleNotFoundError`: paigalda sõltuvused uuesti ja kontrolli, et virtuaalkeskkond on aktiivne.
+- Pildi laadimine ebaõnnestub: kontrolli faili asukohta (`TestImages/image2.jpg`).
+- Tulemusi ei salvestata õigesse kohta: veendu, et käivitad skripti kaustast `PythonCamera`.
+- Monitori salvestus ei tööta: proovi muuta monitori indeksit, näiteks `process_monitor(1, duration_seconds=25)`.
+
+-Kui video faili ei leia siis vaata kas oled PythonCamera kaustas, mitte tema parent kaustas.
