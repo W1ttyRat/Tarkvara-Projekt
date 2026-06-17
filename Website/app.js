@@ -9,6 +9,7 @@ const csurf = require('csurf');
 const helmet = require('helmet');
 const crypto = require('crypto');
 const errorHandler = require('./middleware/error.middleware');
+const { globalLimiter } = require('./middleware/rateLimiter.middleware');
 
 
 // load env vars
@@ -94,6 +95,8 @@ app.use(morgan('dev'));
 
 // serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(globalLimiter); // limiter now applies to routes below this
 
 // configure ejs as the view engine
 app.set('view engine', 'ejs');
