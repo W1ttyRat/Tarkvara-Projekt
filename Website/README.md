@@ -1,18 +1,10 @@
-# Tarkvara-Projekt - Website
+# Broneerimissüsteemi leht
 
-> Professional web application for booking vehicle inspections and managing staff schedules.
-
-![Application screenshot](public/images/ui/image.jpg)
+<img width="1339" height="897" alt="Kuvatõmmis 2026-06-17 112123" src="https://github.com/user-attachments/assets/d739dcb9-286e-4c58-a5e6-a50fc4620ef3" />
 
 ## Eesmärk ja lühikirjeldus
 
-See rakendus on loodud sõiduki ülevaatuse broneerimise ja töötajate graafikute haldamise lihtsustamiseks. Süsteem võimaldab klientidel valida sobiva teenuse, asukoha ja aja, arvestades töötajate töögraafikuid ja nende kvalifikatsioone (juhiloa kategooriad). Tööandjad saavad hallata töötajate vahetusi ja broneeringuid, töötajad näevad oma graafikuid ning kõik toimub läbi ühtse veebiliidese. Rakendus on loodud **Tallinna Tehnikaülikooli** aine "Tarkvara arenduse praktika" raames.
-
-## Projekti autorid
-
-- **Argo Luur**
-- **Gert Matthias Eljas**
-- **Tanel Metshein**
+See rakendus on loodud sõiduki ülevaatuse broneerimise ja töötajate graafikute haldamise lihtsustamiseks. Süsteem võimaldab klientidel valida sobiva teenuse, asukoha ja aja, arvestades töötajate töögraafikuid ja nende kvalifikatsioone (juhiloa kategooriad). Tööandjad saavad hallata töötajate vahetusi ja broneeringuid, töötajad näevad oma graafikuid ning kõik toimub läbi ühtse veebiliidese.
 
 ## Kasutatud tehnoloogiad ja versioonid
 
@@ -138,6 +130,6 @@ See projekt on litsentseeritud **GNU General Public License v3.0** tingimustel. 
 
 ---
 
-*Projekt loodud Tallinna Tehnikaülikooli aine "Tarkvara arenduse praktika" raames.*
+*Projekt loodud Tallinna Ülikooli aine "Tarkvara arenduse praktika" raames.*
 
 
