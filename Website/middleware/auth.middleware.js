@@ -22,7 +22,7 @@ const requireAuth = async (req, res, next) => {
 
         req.user = user;
         next();
-    } catch (err) {
+    } catch (_err) {
         res.clearCookie('access_token', cookieOptions);
         return res.redirect('/auth/login');
     }
@@ -46,7 +46,7 @@ const setCurrentUser = async (req, res, next) => {
             res.locals.user = null;
             req.user = null;
         }
-    } catch (err) {
+    } catch (_err) {
         res.locals.user = null;
         req.user = null;
     }

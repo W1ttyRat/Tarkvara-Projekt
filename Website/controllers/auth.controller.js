@@ -55,7 +55,7 @@ const refreshToken = async (req, res, next) => {
 
 
 
-const logout = async (req, res, next) => {
+const logout = async (req, res, _next) => {
     try {
         await authService.logoutSession(req.cookies?.refresh_token);
     } catch (err) {

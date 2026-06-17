@@ -4,7 +4,6 @@ const Worker = require('../models/worker.model');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const RefreshToken = require('../models/RefreshToken.model');
-const { token } = require('morgan');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const ACCESS_TOKEN_EXPIRES_IN = process.env.ACCESS_TOKEN_EXPIRES_IN || '15m';
@@ -215,7 +214,7 @@ class AuthService {
             await User.incrementSessionVersion(payload.sub); // Invalidate all existing tokens for the user
             await RefreshToken.revokeAllByUserId(payload.sub); // Revoke all refresh tokens for the user
 
-        } catch (_) {
+        } catch (_err) {
             // Ignore token errors during logout, continue global invalidation
         }
     }

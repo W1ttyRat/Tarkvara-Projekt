@@ -44,7 +44,7 @@ app.use(csurf({ cookie: { httpOnly: true, secure: process.env.NODE_ENV === 'prod
 app.use((req, res, next) => {
     try {
         res.locals.csrfToken = req.csrfToken();
-    } catch (err) {
+    } catch (_err) {
         // if no csurf set for route, ignore
         res.locals.csrfToken = null;
     }
