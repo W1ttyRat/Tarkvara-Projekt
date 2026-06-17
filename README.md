@@ -1,28 +1,32 @@
 # Ülevaatuse broneerimissüsteem
 
-See projekt tuvastab sõidukite numbrimärke, kasutades ALPR-i (Automatic License Plate Recognition) ja arvutinägemist. Projekt sisaldab skripte pildi, video või monitori kaadrite töötlemiseks ning tulemuste salvestamiseks JSON-faili.
+Rakendus on loodud **Tallinna Ülikooli** aine "Tarkvara arenduse praktika" raames.
 
-## Funktsionaalsus
+## Projekti autorid
 
-- Numbrimärkide tuvastus pildilt.
-- Numbrimärkide tuvastus videost või veebikaamerast.
-- Numbrimärkide tuvastus monitori ekraanisalvestusest.
-- OCR- ja tuvastuskindluse (confidence) kuvamine.
-- Tuvastatud numbrimärkide salvestus JSON-faili.
+- **Argo Luur**
+- **Gert Matthias Eljas**
+- **Tanel Metshein**
 
-## Projekti struktuur
+## Eesmärk
 
-```
-Tarkvara-Projekt/
-	README.md
-	PythonCamera/
-		detFromImage.py
-		detFromVideo.py
-		carlist.json
-		carlist3.json
-		AnnotatedImages/
-		TestImages/
-```
+See rakendus on loodud sõiduki ülevaatuse broneerimise ja töötajate graafikute haldamise lihtsustamiseks. Süsteem võimaldab klientidel valida sobiva teenuse, asukoha ja aja, arvestades töötajate töögraafikuid ja nende kvalifikatsioone (juhiloa kategooriad). Tööandjad saavad hallata töötajate vahetusi ja broneeringuid, töötajad näevad oma graafikuid ning kõik toimub läbi ühtse veebiliidese.
+
+## Broneerimissüsteemi leht
+
+<img width="1339" height="897" alt="image" src="https://github.com/user-attachments/assets/1c345c9a-80cd-4921-932a-6e7f184efb4b" />
+
+>Juhend asub kaustas Tarkvara-Projekt/Website/README.md
+
+## Numbrimärgituvastus
+
+<img width="490" height="366" alt="image" src="https://github.com/user-attachments/assets/c8dd7f02-edbf-4d78-b3f6-f76c87f29f65" />
+
+
+>Juhend asub kaustas Tarkvara-Projekt/PythonCamera/README.md
+
+
+
 
 ## Tehnoloogiad
 
