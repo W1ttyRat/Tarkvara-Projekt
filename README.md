@@ -1,4 +1,4 @@
-# Tarkvara-Projekt
+# Ülevaatuse broneerimissüsteem
 
 See projekt tuvastab sõidukite numbrimärke, kasutades ALPR-i (Automatic License Plate Recognition) ja arvutinägemist. Projekt sisaldab skripte pildi, video või monitori kaadrite töötlemiseks ning tulemuste salvestamiseks JSON-faili.
 
