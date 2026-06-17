@@ -10,6 +10,8 @@ router.use(requireEmployee); // All routes in this router require the user to be
 router.get('/', employeeController.getEmployeePage);
 
 router.get('/profile', employeeController.getEmployeeProfile);
+router.get('/profile/edit', employeeController.getEditProfilePage);
+router.post('/profile/edit', employeeController.updateProfile);
 
 router.get('/change-password', employeeController.getChangePasswordPage);
 router.post('/change-password', employeeController.postChangePassword);
