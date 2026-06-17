@@ -56,7 +56,6 @@ class AuthService {
         let tempPassword = null;
         if (!password && !confirm_password) {
             tempPassword = crypto.randomBytes(8).toString('base64').slice(0, 12);
-            console.log(`Generated temporary password for ${username}: ${tempPassword}`);
             password = tempPassword;
             confirm_password = tempPassword;
         }
