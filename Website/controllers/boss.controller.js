@@ -120,7 +120,12 @@ const updateShiftStatus = async (req, res, next) => {
 const updateShift = async (req, res, next) => {
     try {
 
-        const shiftId = req.params.id;
+        const shiftId = parseInt(req.params.id, 10);
+        
+        if (Number.isNaN(shiftId)) {
+            return res.status(400).json({ message: "Vigane tööaja ID" });
+        }
+
 
         const {
             location_id,
