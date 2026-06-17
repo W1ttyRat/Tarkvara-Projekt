@@ -18,7 +18,7 @@ See rakendus on loodud sõiduki ülevaatuse broneerimise ja töötajate graafiku
 
 <img width="1339" height="897" alt="image" src="https://github.com/user-attachments/assets/1c345c9a-80cd-4921-932a-6e7f184efb4b" />
 
-### Juhend asub kaustas Tarkvara-Projekt/Website/README.md
+#### Juhend asub kaustas Tarkvara-Projekt/Website/README.md
 
 
 
@@ -27,7 +27,7 @@ See rakendus on loodud sõiduki ülevaatuse broneerimise ja töötajate graafiku
 <img width="490" height="366" alt="image" src="https://github.com/user-attachments/assets/c8dd7f02-edbf-4d78-b3f6-f76c87f29f65" />
 
 
->Juhend asub kaustas Tarkvara-Projekt/PythonCamera/README.md
+#### Juhend asub kaustas Tarkvara-Projekt/PythonCamera/README.md
 
 
 
