@@ -1,0 +1,47 @@
+<section class="booking-step">
+    <h1>Vali teenus ja ülevaatuspunkt</h1>
+
+    <p class="booking-subtitle">
+        Registreerimisnumber:
+        <strong><%= draft.registration_number %></strong>
+    </p>
+
+    <form method="POST" action="/booking/service" class="booking-step-form">        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+        <label>Vali teenus</label>
+        <select id="service_id" name="service_id" required>
+            <option value="">Vali teenus</option>
+            <% service.forEach(s => { %>
+                <option value="<%= s.id %>">
+                    <%= s.name %>
+                </option>
+            <% }) %>
+        </select>
+
+        <label>Vali linn</label>
+        <select id="location" name="location_city" required>
+            <option value="">Vali linn</option>
+            <% [...new Set(location.map(loc => loc.city))].forEach(city => { %>
+                <option value="<%= city %>">
+                    <%= city %>
+                </option>
+            <% }) %>
+        </select>
+
+        <label>Vali ülevaatuspunkt</label>
+        <select id="location_id" name="location_id" disabled required>
+            <option value="">Vali esmalt linn</option>
+        </select>
+
+        <button type="submit">
+            Edasi
+        </button>
+    </form>
+</section>
+
+<script nonce="<%= cspNonce %>">
+    window.locations = <%- JSON.stringify(locations || []) %>;
+</script>
+
+<link rel="stylesheet" href="/css/pages/booking.css">
+<script src="/js/booking.js" defer></script>

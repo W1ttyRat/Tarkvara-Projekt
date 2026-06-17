@@ -1,4 +1,4 @@
-<h1>Broneeri ülevaatus</h1>
+<!-- <h1>Broneeri ülevaatus</h1>
 
 <script nonce="<%= cspNonce %>">
   window.locations = <%- JSON.stringify(locations || []) %>;
@@ -75,4 +75,37 @@
   <input type="email" id="email" name="email" placeholder="Email">
 
   <button type="submit" id="book-btn">Broneeri</button>
-</form>
+</form> -->
+
+<section class="booking-hero">
+  <h1>Broneering</h1>
+
+  <% if (typeof errorMessage !== "undefined" && errorMessage) { %>
+      <p class="booking-error"><%= errorMessage %></p>
+  <% } %>
+
+  <form
+      method="POST"
+      action="/booking/vehicle"
+      class="booking-start-form"
+  >
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <label for="registration_number">
+          Sisesta registreerimisnumber
+      </label>
+
+      <input
+          id="registration_number"
+          name="registration_number"
+          placeholder="123ABC"
+          required
+      >
+
+      <button type="submit">
+          EDASI
+      </button>
+  </form>
+</section>
+
+<link rel="stylesheet" href="/css/pages/booking.css">

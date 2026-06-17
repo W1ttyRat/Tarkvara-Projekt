@@ -58,7 +58,7 @@ class PostgresStore {
 // 1. global limiter
 const globalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 500,
+    max: 5000,
     store: new PostgresStore('global'),
     standardHeaders: true,
     legacyHeaders: false,
@@ -67,7 +67,7 @@ const globalLimiter = rateLimit({
 
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 10,
+    max: 100,
     store: new PostgresStore('login'),
     standardHeaders: true,
     legacyHeaders: false,
@@ -76,14 +76,14 @@ const loginLimiter = rateLimit({
 
 const loginBruteForceLimiter = rateLimit({
     windowMs: 24 * 60 * 60 * 1000,
-    max: 50,
+    max: 500,
     store: new PostgresStore('login_brute'),
     message: 'Daily login attempt limit reached. Please try again tomorrow.',
 });
 
 const bookingLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 1000,
     store: new PostgresStore('booking'),
     standardHeaders: true,
     legacyHeaders: false,

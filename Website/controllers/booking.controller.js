@@ -159,9 +159,14 @@ const createBooking = async (req, res, next) => {
             }).catch(err => console.error('Email sending failed:', err));
         }
 
+        if (req.originalUrl === "/booking/contact") {
+            req.session.bookingDraft = null;
+            return res.redirect("/booking/success");
+        }
+        
         return res.status(201).json({
             success: true,
-            message: 'Broneering edukalt loodud!',
+            message: "Broneering edukalt loodud!",
             data: created
         });
     } catch (error) {
@@ -274,11 +279,232 @@ const getBookingPage = async (req, res, next) => {
         return next(err);
     }
 };
+
+const saveVehicleStep = async (req, res, next) => {
+    try {
+        const registration_number =
+            (req.body.registration_number || "").trim().toUpperCase();
+
+        if (!registration_number) {
+            return res.status(400).render("booking/booking", {
+                title: "Broneering",
+                pageClass: "booking-page",
+                errorMessage: "Sisesta registreerimisnumber",
+                csrfToken: req.csrfToken ? req.csrfToken() : null
+            });
+        }
+
+        req.session.bookingDraft = {
+            registration_number
+        };
+
+        res.redirect("/booking/service");
+
+    } catch (err) {
+        return next(err);
+    }
+};
+
+const getServiceStep = async (req, res, next) => {
+    try {
+        if (!req.session.bookingDraft?.registration_number) {
+            return res.redirect("/booking");
+        }
+
+        const service = await serviceModel.getAllServices();
+        const location = await locationModel.getAllLocations();
+
+        res.render("booking/service", {
+            title: "Vali teenus ja asukoht",
+            pageClass: "booking-page",
+            service,
+            location,
+            locations: location,
+            draft: req.session.bookingDraft,
+            csrfToken: req.csrfToken ? req.csrfToken() : null
+        });
+    } catch (err) {
+        return next(err);
+    }
+};
+
+const saveServiceStep = async (req, res, next) => {
+    try {
+        if (!req.session.bookingDraft?.registration_number) {
+            return res.redirect("/booking");
+        }
+
+        const { service_id, location_id } = req.body;
+
+        if (!service_id || !location_id) {
+            return res.redirect("/booking/service");
+        }
+
+        req.session.bookingDraft = {
+            ...req.session.bookingDraft,
+            service_id,
+            location_id
+        };
+
+        res.redirect("/booking/time");
+    } catch (err) {
+        return next(err);
+    }
+};
+
+const getTimeStep = async (req, res, next) => {
+    try {
+        const draft = req.session.bookingDraft;
+
+        if (!draft?.registration_number) {
+            return res.redirect("/booking");
+        }
+
+        if (!draft?.service_id || !draft?.location_id) {
+            return res.redirect("/booking/service");
+        }
+
+        res.render("booking/time", {
+            title: "Vali aeg",
+            pageClass: "booking-page",
+            draft,
+            csrfToken: req.csrfToken ? req.csrfToken() : null
+        });
+
+    } catch (err) {
+        return next(err);
+    }
+};
+
+const saveTimeStep = async (req, res, next) => {
+    try {
+        const draft = req.session.bookingDraft;
+
+        if (!draft?.registration_number) {
+            return res.redirect("/booking");
+        }
+
+        if (!draft?.service_id || !draft?.location_id) {
+            return res.redirect("/booking/service");
+        }
+
+        const { start_time } = req.body;
+
+        if (!start_time) {
+            return res.redirect("/booking/time");
+        }
+
+        req.session.bookingDraft = {
+            ...draft,
+            start_time
+        };
+
+        res.redirect("/booking/contact");
+
+    } catch (err) {
+        return next(err);
+    }
+};
+
+const getContactStep = async (req, res, next) => {
+    try {
+        const draft = req.session.bookingDraft;
+
+        if (!draft?.registration_number) {
+            return res.redirect("/booking");
+        }
+
+        if (!draft?.service_id || !draft?.location_id) {
+            return res.redirect("/booking/service");
+        }
+
+        if (!draft?.start_time) {
+            return res.redirect("/booking/time");
+        }
+
+        res.render("booking/contact", {
+            title: "Kontaktandmed",
+            pageClass: "booking-page",
+            draft,
+            csrfToken: req.csrfToken ? req.csrfToken() : null
+        });
+
+    } catch (err) {
+        return next(err);
+    }
+};
+
+const saveContactStep = async (req, res, next) => {
+    try {
+        const draft = req.session.bookingDraft;
+
+        if (!draft?.registration_number) {
+            return res.redirect("/booking");
+        }
+
+        if (!draft?.service_id || !draft?.location_id) {
+            return res.redirect("/booking/service");
+        }
+
+        if (!draft?.start_time) {
+            return res.redirect("/booking/time");
+        }
+
+        const {
+            client_name,
+            phone,
+            email,
+            comment
+        } = req.body;
+
+        if (!client_name || !phone) {
+            return res.redirect("/booking/contact");
+        }
+
+        req.body = {
+            registration_number: draft.registration_number,
+            location_id: draft.location_id,
+            service_id: draft.service_id,
+            start_time: draft.start_time,
+            client_name,
+            phone,
+            email,
+            comment
+        };
+
+        await createBooking(req, res, next);
+
+        req.session.bookingDraft = null;
+
+    } catch (err) {
+        return next(err);
+    }
+};
+
+const getSuccessPage = async (req, res, next) => {
+    try {
+        res.render("booking/success", {
+            title: "Broneering õnnestus",
+            pageClass: "booking-page"
+        });
+    } catch (err) {
+        return next(err);
+    }
+};
+
 module.exports = {
     getAllBookings,
     createBooking,
     cancelReservation,
     getBookingPage,
     checkFit,
-    checkAvailability
+    checkAvailability,
+    saveVehicleStep,
+    getServiceStep,
+    saveServiceStep,
+    getTimeStep,
+    saveTimeStep,
+    getContactStep,
+    saveContactStep,
+    getSuccessPage
 };

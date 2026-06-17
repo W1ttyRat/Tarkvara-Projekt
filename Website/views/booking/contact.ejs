@@ -1,0 +1,49 @@
+<section class="booking-step">
+    <h1>Kontaktandmed</h1>
+
+    <p class="booking-subtitle">
+        Auto:
+        <strong><%= draft.registration_number %></strong>
+    </p>
+
+    <p class="booking-subtitle">
+        Valitud aeg:
+        <strong><%= draft.start_time %></strong>
+    </p>
+
+    <form method="POST" action="/booking/contact" class="booking-contact-form">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+        <label>Nimi</label>
+        <input
+            type="text"
+            name="client_name"
+            required
+        >
+
+        <label>Telefon</label>
+        <input
+            type="text"
+            name="phone"
+            required
+        >
+
+        <label>Email</label>
+        <input
+            type="email"
+            name="email"
+        >
+
+        <label>Kommentaar</label>
+        <textarea
+            name="comment"
+            rows="4"
+        ></textarea>
+
+        <button type="submit">
+            Kinnita broneering
+        </button>
+    </form>
+</section>
+
+<link rel="stylesheet" href="/css/pages/booking.css">
