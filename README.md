@@ -2,6 +2,8 @@
 
 Rakendus on loodud **Tallinna Ülikooli** aine "Tarkvara arenduse praktika" raames.
 
+Live server: https://tarkvara-projekt.onrender.com
+
 ## Projekti autorid
 
 - **Argo Luur**
