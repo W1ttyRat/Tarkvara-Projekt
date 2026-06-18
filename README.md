@@ -1,6 +1,6 @@
 # Ülevaatuse broneerimissüsteem
 
-Rakendus on loodud **Tallinna Ülikooli** aine "Tarkvara arenduse praktika" raames.
+Rakendus on loodud **Tallinna Ülikooli** aine "Tarkvaraarenduse praktika" raames.
 
 Live server: https://tarkvara-projekt.onrender.com
 
