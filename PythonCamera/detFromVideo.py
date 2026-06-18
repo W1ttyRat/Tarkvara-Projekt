@@ -1,5 +1,4 @@
 from pathlib import Path
-
 import cv2, mss, time, json
 from fast_alpr import ALPR
 import numpy as np
@@ -9,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent
 # Initialize the ALPR system with the specified models
 MODEL = ALPR(
     detector_model="yolo-v9-t-384-license-plate-end2end",
-    ocr_model="cct-xs-v1-global-model",
+    ocr_model="cct-xs-v2-global-model",
 )
 
 # load the image
@@ -35,6 +34,9 @@ def save_annotated_image(annotated_frame):
 
 # process video frames from a video file or webcam
 def process_video(source):
+    CarSet = set()
+    CarList = []
+
     cap = cv2.VideoCapture(source)
     if not cap.isOpened():
         raise RuntimeError(f"Could not open video source: {source}")
@@ -51,17 +53,25 @@ def process_video(source):
             det_confidence = r.detection.confidence
             box = r.detection.bounding_box
 
-            if ocr_confidence > 0.6 and det_confidence > 0.6:
-                print(f"High confidence for plate: {plate_text}, OCR Confidence: {ocr_confidence:.2f}, Detection Confidence: {det_confidence:.2f}, Box: {box}")
-            else:
-                print(f"Low confidence for plate: {plate_text}, OCR Confidence: {ocr_confidence:.2f}, Detection Confidence: {det_confidence:.2f}, Box: {box}")
+            calculated_confidence = calculate_confidence(ocr_confidence)
+
+            if calculated_confidence > 0.98 and det_confidence > 0.82 and plate_text not in CarSet:
+                CarSet.add(plate_text)
+                CarList.append((plate_text, round(calculated_confidence, 2), round(det_confidence, 2)))
+
+            if calculated_confidence > 0.98 and det_confidence > 0.82:
+                print(f"High confidence for plate: {plate_text}, OCR Confidence: {calculated_confidence:.2f}, Detection Confidence: {det_confidence:.2f}, Box: {box}")
+            
 
         
 
     cap.release()
+    return CarList
 
 # process video frames from a specific monitor for a certain duration
 def process_monitor(monitor_index=2, duration_seconds=30):
+    CarSet = set()
+    CarList = list()
 
     with mss.mss() as sct:
 
@@ -84,15 +94,15 @@ def process_monitor(monitor_index=2, duration_seconds=30):
                 det_confidence = r.detection.confidence
                 box = r.detection.bounding_box
 
-                if ocr_confidence > 0.98 and det_confidence > 0.82 and plate_text not in CarSet:
+                calculated_confidence = calculate_confidence(ocr_confidence)
+
+                if calculated_confidence > 0.98 and det_confidence > 0.82 and plate_text not in CarSet:
                     CarSet.add(plate_text)
-                    CarList.append((plate_text, round(ocr_confidence, 2), round(det_confidence, 2)))
+                    CarList.append((plate_text, round(calculated_confidence, 2), round(det_confidence, 2)))
 
 
-                if ocr_confidence > 0.6 and det_confidence > 0.6:
-                    print(f"High confidence for plate: {plate_text}, OCR Confidence: {ocr_confidence:.2f}, Detection Confidence: {det_confidence:.2f}, Box: {box}")
-                else:
-                    print(f"Low confidence for plate: {plate_text}, OCR Confidence: {ocr_confidence:.2f}, Detection Confidence: {det_confidence:.2f}, Box: {box}")
+                if calculated_confidence > 0.9 and det_confidence > 0.8:
+                    print(f"High confidence for plate: {plate_text}, OCR Confidence: {calculated_confidence:.2f}, Detection Confidence: {det_confidence:.2f}, Box: {box}")
 
 
 def save_carlist_json(car_list, output_path="carlist.json"):
@@ -100,26 +110,26 @@ def save_carlist_json(car_list, output_path="carlist.json"):
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump([{"plate": p, "ocr_confidence": o, "det_confidence": d} for p, o, d in car_list], f, indent=2)
 
+def calculate_confidence(list_of_confidences):
+    return sum(list_of_confidences) / len(list_of_confidences)
 
 if __name__ == "__main__":
     print("Starting ALPR system in 2 seconds...")
-    CarSet = set()
-    CarList = []
     time.sleep(2)
+    print("Processing video...")
     
-
     # For webcam, use 0
     #process_video(0)
 
     # For video file, provide the path
-    process_video(BASE_DIR / "carVideo2.mp4")
+    car_list = process_video(BASE_DIR / "carVideo2.mp4")
 
     # For 2nd monitor screen capture
     #process_monitor(2, duration_seconds=25)
 
-    for plate_info in CarList:
+    for plate_info in car_list:
         print(f"Detected Plate: {plate_info[0]}, OCR Confidence: {plate_info[1]}, Detection Confidence: {plate_info[2]}")
-    
-    save_carlist_json(CarList, "carlist.json")
+    #print(len(car_list))
+    save_carlist_json(car_list, "carlist.json")
 
 
