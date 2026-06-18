@@ -330,7 +330,8 @@ const getServiceStep = async (req, res, next) => {
 
 const saveServiceStep = async (req, res, next) => {
     try {
-        if (!req.session.bookingDraft?.registration_number) {
+        const registration_number = req.session.bookingDraft?.registration_number;
+        if (!registration_number) {
             return res.redirect("/booking");
         }
 
@@ -338,6 +339,22 @@ const saveServiceStep = async (req, res, next) => {
 
         if (!service_id || !location_id) {
             return res.redirect("/booking/service");
+        }
+
+        const fitResult = await Booking.checkVehicleFitByRegistration(registration_number, parseInt(location_id, 10));
+        if (!fitResult.fits) {
+            const service = await serviceModel.getAllServices();
+            const location = await locationModel.getAllLocations();
+            return res.status(400).render("booking/service", {
+                title: "Vali teenus ja asukoht",
+                pageClass: "booking-page",
+                errorMessage: fitResult.message || "Sõiduk ei mahu valitud asukohta.",
+                service,
+                location,
+                locations: location,
+                draft: req.session.bookingDraft,
+                csrfToken: req.csrfToken ? req.csrfToken() : null
+            });
         }
 
         req.session.bookingDraft = {

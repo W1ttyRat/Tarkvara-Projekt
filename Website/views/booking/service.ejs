@@ -6,6 +6,12 @@
         <strong><%= draft.registration_number %></strong>
     </p>
 
+    <% if (typeof errorMessage !== "undefined" && errorMessage) { %>
+        <p class="booking-error" style="color: #b00020; margin-bottom: 1rem; font-weight: 500;">
+            <%= errorMessage %>
+        </p>
+    <% } %>
+
     <form method="POST" action="/booking/service" class="booking-step-form">        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
         <label>Vali teenus</label>
@@ -33,7 +39,9 @@
             <option value="">Vali esmalt linn</option>
         </select>
 
-        <button type="submit">
+        <div id="fit-msg" style="margin: 8px 0; font-weight: 500;"></div>
+
+        <button type="submit" id="book-btn">
             Edasi
         </button>
     </form>

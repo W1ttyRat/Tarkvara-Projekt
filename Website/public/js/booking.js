@@ -61,7 +61,13 @@ if (!citySelect || !locationSelect) {
 
   function updateBookButtonState() {
     if (!bookBtn) return;
-    bookBtn.disabled = !(fitOk && availabilityOk);
+    // In multi-step, availabilityOk might not be defined/used in the same way
+    const isMultiStepService = !!document.querySelector('.booking-step-form');
+    if (isMultiStepService) {
+      bookBtn.disabled = !fitOk;
+    } else {
+      bookBtn.disabled = !(fitOk && availabilityOk);
+    }
   }
 
   function getCsrfHeaders() {
@@ -74,7 +80,15 @@ if (!citySelect || !locationSelect) {
 
   function getRegistrationNumber() {
     const el = document.getElementById('registration_number');
-    return el ? el.value.trim() : '';
+    if (el) return el.value.trim();
+    if (window.bookingDraft && window.bookingDraft.registration_number) {
+      return window.bookingDraft.registration_number;
+    }
+    // For service.ejs which might have it in a strong tag or window variable
+    const subtitleStrong = document.querySelector('.booking-subtitle strong');
+    if (subtitleStrong) return subtitleStrong.textContent.trim();
+
+    return '';
   }
 
   function pad2(value) {
@@ -311,7 +325,9 @@ if (!citySelect || !locationSelect) {
     }
 
     checkFit(id);
-    checkAvailability();
+    if (!document.querySelector('.booking-step-form')) {
+      checkAvailability();
+    }
   });
 
   if (serviceSelect) {
