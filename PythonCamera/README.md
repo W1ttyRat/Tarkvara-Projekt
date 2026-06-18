@@ -5,6 +5,7 @@
 - fast_alpr
 - mss
 - numpy
+- onnxruntime (onnxruntime-gpu)
 
 ## Eeldused
 
@@ -22,16 +23,22 @@ Enne käivitamist veendu, et süsteemis on olemas:
 python -m venv .venv
 ```
 
-3. Aktiveeri virtuaalkeskkond (Windows PowerShell):
+3. Aktiveeri virtuaalkeskkond vastavalt oma terminalile:
 
+Powershell
 ```powershell
 .\.venv\Scripts\Activate.ps1
+```
+
+Command Prompt
+```command prompt
+.\.venv\Scripts\activate.bat
 ```
 
 4. Paigalda vajalikud paketid:
 
 ```powershell
-pip install opencv-python fast-alpr mss numpy
+pip install opencv-python fast-alpr mss numpy onnxruntime
 ```
 
 ## Kasutamine
@@ -108,7 +115,7 @@ Näide:
 Failides `detFromImage.py` ja `detFromVideo.py` kasutatakse:
 
 - Detektorimudel: `yolo-v9-t-384-license-plate-end2end`
-- OCR mudel: `cct-xs-v1-global-model`
+- OCR mudel: `cct-xs-v2-global-model`
 
 Kindluse läved:
 
